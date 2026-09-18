@@ -89,7 +89,7 @@ const AboutPage = () => {
             >
               We are passionate about connecting readers with stories that inspire,
               educate, and transform. Since 2020, we have been building a community
-              of book lovers and curating the finest selection of books for readers
+              of book lovers and curating the  finest selection of books for readers
               of all ages.
             </motion.p>
           </motion.div>
