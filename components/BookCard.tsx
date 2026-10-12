@@ -4,15 +4,19 @@ import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCartContext } from "@/contexts/CartContext";
+import { useSearchParams } from "next/navigation";
 import { Book } from "@/lib/types";
 
 interface BookCardProps {
   book: Book;
   delay?: number;
+  categoryId?: string;
 }
 
-const BookCard = ({ book, delay = 0 }: BookCardProps) => {
+const BookCard = ({ book, delay = 0, categoryId }: BookCardProps) => {
   const { addToCart } = useCartContext();
+  const searchParams = useSearchParams();
+  const currentCategoryId = categoryId || searchParams.get("categoryId") || undefined;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -20,7 +24,7 @@ const BookCard = ({ book, delay = 0 }: BookCardProps) => {
 
     const defaultPaper = book.papers?.find(p => p.isDefault && p.isInStock) || book.papers?.[0];
     if (defaultPaper) {
-      addToCart(book.id, defaultPaper.id, 1);
+      addToCart(book.id, defaultPaper.id, 1, currentCategoryId);
     }
   };
 

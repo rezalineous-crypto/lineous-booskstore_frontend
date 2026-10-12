@@ -8,7 +8,7 @@ import { Cart, CartItem } from "@/lib/types";
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (bookId: string, paperId?: string, quantity?: number) => void;
+  addToCart: (bookId: string, paperId?: string, quantity?: number, categoryId?: string) => void;
   removeFromCart: (cartItemId: string) => void;
   updateQuantity: (cartItemId: string, quantity: number) => void;
   clearCart: () => void;
@@ -33,8 +33,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const items = cart?.cartItems || [];
   const isCartLoading = isLoading || !mounted;
 
-  const addToCart = (bookId: string, paperId?: string, quantity: number = 1) => {
-    addToCartMutate({ bookId, paperId, quantity });
+  const addToCart = (bookId: string, paperId?: string, quantity: number = 1, categoryId?: string) => {
+    addToCartMutate({ bookId, paperId, quantity, categoryId });
   };
 
   const removeFromCart = (cartItemId: string) => {

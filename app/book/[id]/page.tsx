@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -37,11 +37,13 @@ import { useBook } from "@/hooks/use-books";
 const BookDetailsPage = () => {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { addToCart } = useCartContext();
   const [quantity, setQuantity] = useState(1);
   const [selectedPaperId, setSelectedPaperId] = useState<string | null>(null);
   const initializedRef = useRef(false);
 
+  const categoryIdFromUrl = searchParams.get("categoryId");
   const { data: book, isLoading, error } = useBook(params?.id as string);
 
   // Set default paper on book load
@@ -70,7 +72,7 @@ const BookDetailsPage = () => {
         alert("Please select a paper variant");
         return;
       }
-      addToCart(book.id, selectedPaperId, quantity);
+      addToCart(book.id, selectedPaperId, quantity, categoryIdFromUrl || undefined);
     }
   };
 
@@ -197,13 +199,39 @@ const BookDetailsPage = () => {
             animate={{ opacity: 1 }}
             className="mb-8"
           >
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-slate-500 hover:text-primary transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Store
-            </Link>
+            <div className="flex items-center justify-between mb-4">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 text-slate-500 hover:text-primary transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Store
+              </Link>
+            </div>
+            <nav className="text-sm text-muted-foreground">
+              <ol className="flex items-center gap-2 flex-wrap">
+                <li>
+                  <button onClick={() => router.push("/")} className="hover:text-primary transition-colors">
+                    Home
+                  </button>
+                </li>
+                {book.categories && book.categories.length > 0 && (
+                  <>
+                    <li>/</li>
+                    <li>
+                      <button
+                        onClick={() => router.push(`/books?categoryId=${book?.categories[0]?.id}`)}
+                        className="hover:text-primary transition-colors"
+                      >
+                        {book.categories[0].name}
+                      </button>
+                    </li>
+                  </>
+                )}
+                <li>/</li>
+                <li className="text-foreground font-medium truncate max-w-md">{book.title}</li>
+              </ol>
+            </nav>
           </motion.div>
 
           {/* Book Details */}

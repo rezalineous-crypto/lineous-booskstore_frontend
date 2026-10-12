@@ -42,9 +42,14 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
+  isHidden?: boolean;
+  displayOrder?: number;
+  icon?: string;
+  route?: string;
   parentId: string | null;
-  createdAt: string;
-  updatedAt: string;
+  children?: Category[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Book Attachment
@@ -136,6 +141,7 @@ export interface Book {
   reviews: Review[];
   papers: BookPaper[];
   priceRange: PriceRange | null;
+  categories?: Category[];
 }
 
 // Banner
@@ -189,6 +195,7 @@ export interface CartItem {
   cartId: string;
   bookId: string;
   paperId: string | null;
+  categoryId?: string | null;
   quantity: number;
   book: {
     id: string;
@@ -196,6 +203,7 @@ export interface CartItem {
     thumbnail: string;
   };
   paper: BookPaper | null;
+  category?: Category;
 }
 
 // Cart
@@ -239,12 +247,14 @@ export interface OrderItem {
   orderId?: string;
   bookId?: string | null;
   paperId?: string | null;
+  categoryId?: string | null;
   bookTitle: string;
   paperName: string | null;
   paperPrice: string | number;
   quantity: number;
   subtotal: string | number;
   paper: BookPaper | null;
+  category?: Category;
 }
 
 // Payment

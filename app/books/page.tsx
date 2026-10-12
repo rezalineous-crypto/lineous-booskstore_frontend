@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import BookCard from "@/components/BookCard";
 import { useBooks } from "@/hooks/use-books";
 import { useSubjects } from "@/hooks/use-subjects";
+import { useCategory } from "@/hooks/use-categories";
+import { useBookTree } from "@/hooks/use-book-tree";
 import { Book } from "@/lib/types";
 
 const BooksContent = () => {
@@ -17,16 +19,41 @@ const BooksContent = () => {
   const selectedSubjectId = useMemo(() => {
     return searchParams.get("subjectId");
   }, [searchParams]);
+  const selectedCategoryId = useMemo(() => {
+    return searchParams.get("categoryId");
+  }, [searchParams]);
+  const searchQuery = useMemo(() => {
+    return searchParams.get("search") || searchParams.get("q") || "";
+  }, [searchParams]);
 
+  const { data: category } = useCategory(selectedCategoryId || "");
+  const { data: bookTree = [] } = useBookTree(selectedCategoryId || undefined);
   const { data: subjects = [] } = useSubjects();
-  const { data: books = [], isLoading, error } = useBooks(selectedSubjectId || undefined);
+  const { data: booksData = [], isLoading, error } = useBooks(
+    selectedSubjectId || undefined,
+    selectedCategoryId || undefined,
+    searchQuery || undefined
+  );
+
+  // Client-side filtering for search results by category if needed (as per requirements)
+  const books = useMemo(() => {
+    if (!selectedCategoryId) return booksData;
+    return booksData.filter((book) => {
+      // Check if book belongs to the selected category
+      if (book.categories && book.categories.length > 0) {
+        return book.categories.some((cat) => cat.id === selectedCategoryId);
+      }
+      return true;
+    });
+  }, [booksData, selectedCategoryId]);
 
   const handleSubjectClick = (subjectId: string) => {
     router.push(`/books?subjectId=${subjectId}`);
   };
 
   const handleBookClick = (book: Book) => {
-    router.push(`/book/${book.id}`);
+    const url = selectedCategoryId ? `/book/${book.id}?categoryId=${selectedCategoryId}` : `/book/${book.id}`;
+    router.push(url);
   };
 
   if (isLoading) {
@@ -75,14 +102,48 @@ const BooksContent = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
+            {/* Breadcrumbs */}
+            <nav className="mb-4 text-sm text-muted-foreground">
+              <ol className="flex items-center gap-2">
+                <li>
+                  <button onClick={() => router.push("/")} className="hover:text-primary transition-colors">
+                    Home
+                  </button>
+                </li>
+                <li>/</li>
+                {category && (
+                  <>
+                    <li className="text-foreground font-medium">{category.name}</li>
+                  </>
+                )}
+                {!category && selectedSubject && (
+                  <>
+                    <li className="text-foreground font-medium">{selectedSubject.name}</li>
+                  </>
+                )}
+                {!category && !selectedSubject && (
+                  <>
+                    <li className="text-foreground font-medium">All Books</li>
+                  </>
+                )}
+              </ol>
+            </nav>
             <h1 className="font-display text-3xl lg:text-4xl font-bold text-foreground mb-2">
-              {selectedSubject ? selectedSubject.name : "All Books"}
+              {searchQuery
+                ? `Search Results for "${searchQuery}"`
+                : (category ? category.name : (selectedSubject ? selectedSubject.name : "All Books"))
+              }
             </h1>
             <p className="text-muted-foreground">
-              {selectedSubject
-                ? `Browse all past papers for ${selectedSubject.name}`
-                : "Explore our collection of past papers"
-              }
+              {searchQuery
+                ? `Found ${books.length} book${books.length === 1 ? "" : "s"}`
+                : (category
+                  ? `Browse books in ${category.name}`
+                  : (selectedSubject
+                    ? `Browse all past papers for ${selectedSubject.name}`
+                    : "Explore our collection of past papers"
+                  )
+                )}
             </p>
           </motion.div>
 
@@ -132,7 +193,7 @@ const BooksContent = () => {
             >
               {books.map((book, index) => (
                 <div key={book.id} onClick={() => handleBookClick(book)} className="cursor-pointer">
-                  <BookCard book={book} delay={index * 0.05} />
+                  <BookCard book={book} delay={index * 0.05} categoryId={selectedCategoryId || undefined} />
                 </div>
               ))}
             </motion.div>

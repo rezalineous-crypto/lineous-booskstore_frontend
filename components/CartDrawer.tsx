@@ -154,8 +154,13 @@ const CartDrawer = () => {
                                 {item.paper.name}
                               </p>
                             )}
+                            {item.category && (
+                              <p className="text-xs text-slate-500 mb-1">
+                                {item.category.name}
+                              </p>
+                            )}
                             <p className="text-sm text-slate-500 mb-2">
-                              {item.paper ? `${item.paper.name} • ` : ""}Book
+                              {item.paper ? `${item.paper.name}` : "Book"}
                             </p>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center border border-slate-200 rounded-lg bg-white">

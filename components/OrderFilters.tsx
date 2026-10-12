@@ -1,8 +1,9 @@
 "use client";
 
-import { Search, X, SlidersHorizontal, Calendar, Truck } from "lucide-react";
+import { Search, X, SlidersHorizontal, Calendar, Truck, Tag } from "lucide-react";
 import { Input } from "./ui/input";
 import { Separator } from "./ui/separator";
+import { useCategories } from "@/hooks/use-categories";
 
 export type OrderDateRange = "all" | "today" | "week" | "month";
 
@@ -10,6 +11,7 @@ export interface OrderFilterState {
   search: string;
   statuses: string[];
   dateRange: OrderDateRange;
+  categoryId?: string;
 }
 
 export const ORDER_STATUSES: { value: string; label: string }[] = [
@@ -26,6 +28,7 @@ export const DEFAULT_ORDER_FILTERS: OrderFilterState = {
   search: "",
   statuses: [],
   dateRange: "all",
+  categoryId: undefined,
 };
 
 interface OrderFiltersProps {
@@ -53,7 +56,8 @@ export function OrderFilters({ value, onChange, resultCount }: OrderFiltersProps
   const hasActiveFilters =
     value.search.trim() !== "" ||
     value.statuses.length > 0 ||
-    value.dateRange !== "all";
+    value.dateRange !== "all" ||
+    !!value.categoryId;
 
   const dateOptions: { value: OrderDateRange; label: string }[] = [
     { value: "all", label: "All Time" },
@@ -61,6 +65,8 @@ export function OrderFilters({ value, onChange, resultCount }: OrderFiltersProps
     { value: "week", label: "Last 7 Days" },
     { value: "month", label: "Last 30 Days" },
   ];
+
+  const { data: categories = [] } = useCategories();
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-shadow">
@@ -93,6 +99,43 @@ export function OrderFilters({ value, onChange, resultCount }: OrderFiltersProps
             placeholder="Book title..."
             className="pl-9 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20"
           />
+        </div>
+      </div>
+
+      <Separator className="my-4" />
+
+      {/* Category filter */}
+      <div className="space-y-2 mb-5">
+        <label className="text-xs font-medium text-slate-500 uppercase tracking-wide flex items-center gap-1">
+          <Tag className="w-3.5 h-3.5" /> Category
+        </label>
+        <div className="grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto">
+          <button
+            type="button"
+            onClick={() => onChange({ ...value, categoryId: undefined })}
+            className={`text-sm px-3 py-2 rounded-lg border transition-colors text-left ${
+              !value.categoryId
+                ? "bg-violet-50 border-violet-300 text-violet-700 font-medium"
+                : "bg-white border-slate-200 text-slate-600 hover:border-violet-200"
+            }`}
+          >
+            All Categories
+          </button>
+          {categories.slice(0, 20).map((category) => (
+            <button
+              key={category.id}
+              type="button"
+              onClick={() => onChange({ ...value, categoryId: category.id })}
+              className={`text-sm px-3 py-2 rounded-lg border transition-colors text-left truncate ${
+                value.categoryId === category.id
+                  ? "bg-violet-50 border-violet-300 text-violet-700 font-medium"
+                  : "bg-white border-slate-200 text-slate-600 hover:border-violet-200"
+              }`}
+              title={category.name}
+            >
+              {category.name}
+            </button>
+          ))}
         </div>
       </div>
 

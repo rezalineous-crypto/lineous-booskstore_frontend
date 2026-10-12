@@ -6,11 +6,14 @@ import { apiClient, ApiError, getToken, BASE_URL } from "@/lib/api-client";
 import { Order, Receipt } from "@/lib/types";
 
 // Get all orders
-export const useOrders = (userId?: string) => {
+export const useOrders = (userId?: string, categoryId?: string) => {
   return useQuery<Order[], Error>({
-    queryKey: ["orders", userId],
+    queryKey: ["orders", userId, categoryId],
     queryFn: async () => {
-      const response = await apiClient.get<Order[]>("/orders");
+      const params = new URLSearchParams();
+      if (categoryId) params.append("categoryId", categoryId);
+      const url = params.toString() ? `/orders?${params.toString()}` : "/orders";
+      const response = await apiClient.get<Order[]>(url);
       return response.data;
     },
   });

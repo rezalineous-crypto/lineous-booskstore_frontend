@@ -19,7 +19,8 @@ import { useCartContext } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useBookTree } from "@/hooks/use-book-tree";
+import { useCategoriesMenu } from "@/hooks/use-categories";
+import { Category } from "@/lib/types";
 
 export interface MenuItemProps {
   name: string;
@@ -522,37 +523,38 @@ const MobileSubItem = ({
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState<Record<string, boolean>>({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const { totalItems, setIsCartOpen } = useCartContext();
   const { isAuthenticated, mounted } = useAuth();
   const navigate = useRouter();
   const pathname = usePathname();
-  const { data: bookTree = [], isLoading, error } = useBookTree();
+  const { data: menuCategories = [], isLoading, error } = useCategoriesMenu();
 
-  // Build 3-layer menu: Publication > Subject > Book
-  const pastPapersChildren = bookTree.map((pub) => ({
-    name: pub.publication.name,
-    children: pub.subjects.map((sub) => ({
-      name: sub.subject.name,
-      href: `/books?subjectId=${sub.subject.id}`,
-      children: sub.books.map((book) => ({
-        name: book.title,
-        href: `/book/${book.id}`,
-      })),
-    })),
-  }));
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate.push(`/books?search=${encodeURIComponent(searchQuery.trim())}`);
+      setShowSearch(false);
+      setSearchQuery("");
+    }
+  };
+
+  // Build menu from categories (category hierarchy only as per requirements)
+  const transformCategoryToMenuItem = (category: Category): MenuItemProps => {
+    const href = category.route || (category.id ? `/books?categoryId=${category.id}` : undefined);
+    return {
+      name: category.name,
+      href,
+      children: category.children?.map((child: Category) => transformCategoryToMenuItem(child)) || [],
+    };
+  };
 
   const navLinks = [
     { name: "Home", children: [], href: "/" },
-    {
-      name: "Past Papers",
-      href: "/books",
-      children: isLoading || error ? [] : pastPapersChildren,
-      isLoading,
-      error: error?.message || null,
-    },
-    { name: "Yearwise", children: [] },
-    { name: "Coursebooks", children: [] },
-    { name: "Teachers", children: [] },
+    ...(isLoading || error
+      ? [{ name: "Menu", children: [], isLoading, error: error?.message || null }]
+      : menuCategories.map(transformCategoryToMenuItem)),
   ] as MenuItemProps[];
 
   const toggleMobile = (key: string) => {
@@ -609,11 +611,23 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-1.5">
+            {showSearch && (
+              <form onSubmit={handleSearch} className="hidden lg:block mr-2">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search books..."
+                  className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-48"
+                  autoFocus
+                />
+              </form>
+            )}
             {mounted && isAuthenticated ? (
               <>
                 <IconButton
                   icon={<Search className="w-4.5 h-4.5" />}
-                  onClick={() => {}}
+                  onClick={() => setShowSearch(!showSearch)}
                 />
                 <IconButton
                   icon={<Heart className="w-[18px] h-[18px]" />}
@@ -665,6 +679,15 @@ const Navbar = () => {
             className="lg:hidden border-t border-slate-200 overflow-hidden bg-white/95 backdrop-blur-2xl"
           >
             <div className="p-4 space-y-1">
+              <form onSubmit={handleSearch} className="mb-3">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search books..."
+                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </form>
               {navLinks.map((link, idx) => (
                 <MenuItem
                   key={idx}

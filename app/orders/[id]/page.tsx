@@ -237,6 +237,11 @@ const OrderDetailPage = () => {
                           )}
                           <p className="text-sm text-slate-500 mt-1">
                             Qty: {item.quantity}
+                            {item.categoryId && (
+                              <span className="ml-2 text-xs text-violet-600">
+                                • Category: {item.category?.name || item.categoryId}
+                              </span>
+                            )}
                           </p>
                         </div>
                         <div className="text-right">

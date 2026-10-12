@@ -26,3 +26,14 @@ export const useCategory = (id: string) => {
     enabled: !!id,
   });
 };
+
+// Get categories menu
+export const useCategoriesMenu = () => {
+  return useQuery<Category[], Error>({
+    queryKey: ["categories", "menu"],
+    queryFn: async () => {
+      const response = await apiClient.get<Category[]>("/categories/menu");
+      return response.data;
+    },
+  });
+};
