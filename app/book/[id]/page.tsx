@@ -215,12 +215,15 @@ const BookDetailsPage = () => {
                     Home
                   </button>
                 </li>
-                {book.categories && book.categories.length > 0 && (
+                {book.categories && book.categories[0] && (
                   <>
                     <li>/</li>
                     <li>
                       <button
-                        onClick={() => router.push(`/books?categoryId=${book?.categories[0]?.id}`)}
+                        onClick={() => {
+                          const catId = book.categories?.[0]?.id;
+                          if (catId) router.push(`/books?categoryId=${catId}`);
+                        }}
                         className="hover:text-primary transition-colors"
                       >
                         {book.categories[0].name}
