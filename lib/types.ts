@@ -368,6 +368,33 @@ export interface BookTreePublication {
 }
 
 export type BookTreeResponse = BookTreePublication[];
+// Menu Tree (for /categories/menu/tree endpoint)
+export interface MenuTreeBook {
+  id: string;
+  title: string;
+  slug: string;
+}
+
+export interface MenuTreeSubject {
+  id: string;
+  name: string;
+  slug: string;
+  books: MenuTreeBook[];
+}
+
+export interface MenuTreePublication {
+  id: string;
+  name: string;
+  slug: string;
+  subjects: MenuTreeSubject[];
+}
+
+export interface MenuTreeCategory extends Category {
+  publications: MenuTreePublication[];
+}
+
+export type MenuTreeResponse = MenuTreeCategory[];
+
 export interface UserProfile {
   id: string;
   email: string;

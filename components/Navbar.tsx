@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -19,8 +19,13 @@ import { useCartContext } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useCategoriesMenu } from "@/hooks/use-categories";
-import { Category } from "@/lib/types";
+import { useCategoriesMenuTree } from "@/hooks/use-categories";
+import {
+  MenuTreeCategory,
+  MenuTreePublication,
+  MenuTreeSubject,
+  MenuTreeBook,
+} from "@/lib/types";
 
 export interface MenuItemProps {
   name: string;
@@ -180,18 +185,22 @@ const MenuItem = ({
           ${
             hasChildren
               ? isOpen
-                  ? "bg-primary/5 text-primary"
-                  : "text-slate-700 hover:text-primary hover:bg-slate-50"
+                ? "bg-primary/5 text-primary"
                 : "text-slate-700 hover:text-primary hover:bg-slate-50"
+              : "text-slate-700 hover:text-primary hover:bg-slate-50"
           }
         `}
       >
-        <Link
-          href={item?.href || ""}
-          className="text-[13px] font-medium tracking-wide"
-        >
-          {item.name}
-        </Link>
+        {item.isLoading || item.name?.startsWith("skeleton") ? (
+          <div className="h-4 w-16 bg-slate-200 rounded animate-pulse" />
+        ) : (
+          <Link
+            href={item?.href || ""}
+            className="text-[13px] font-medium tracking-wide"
+          >
+            {item.name}
+          </Link>
+        )}
         {hasChildren && (
           <ChevronDown
             className={`w-3.5 h-3.5 transition-transform duration-200 ${
@@ -246,9 +255,9 @@ const MenuItem = ({
                               className={`
                                   flex items-center justify-between cursor-pointer py-2.5 px-3 rounded-lg transition-colors duration-150
                                   ${
-                                      isActive
-                                       ? "bg-primary/5 text-primary"
-                                       : "text-slate-700 hover:text-primary hover:bg-slate-50"
+                                    isActive
+                                      ? "bg-primary/5 text-primary"
+                                      : "text-slate-700 hover:text-primary hover:bg-slate-50"
                                   }
                                 `}
                               onMouseEnter={() => {
@@ -316,9 +325,9 @@ const MenuItem = ({
                                     >
                                       <span
                                         className={`text-[13px] font-medium ${
-                                      isActive
-                                       ? "bg-primary/5 text-primary"
-                                       : "text-slate-700 hover:text-primary hover:bg-slate-50"
+                                          isActive
+                                            ? "bg-primary/5 text-primary"
+                                            : "text-slate-700 hover:text-primary hover:bg-slate-50"
                                         } rounded-md px-2 py-0.5`}
                                       >
                                         {childItem.name}
@@ -525,11 +534,21 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [skeletonCount, setSkeletonCount] = useState(() => {
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem("menuTreeVisibleCount");
+      if (cached) {
+        const count = parseInt(cached);
+        if (!isNaN(count)) return count;
+      }
+    }
+    return 5;
+  });
   const { totalItems, setIsCartOpen } = useCartContext();
   const { isAuthenticated, mounted } = useAuth();
   const navigate = useRouter();
   const pathname = usePathname();
-  const { data: menuCategories = [], isLoading, error } = useCategoriesMenu();
+  const { data: menuTree = [], isLoading, error } = useCategoriesMenuTree();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -540,21 +559,105 @@ const Navbar = () => {
     }
   };
 
-  // Build menu from categories (category hierarchy only as per requirements)
-  const transformCategoryToMenuItem = (category: Category): MenuItemProps => {
-    const href = category.route || (category.id ? `/books?categoryId=${category.id}` : undefined);
+  /**
+   * Transform menu tree data (Category → Publication → Subject → Book) into navbar menu structure
+   * Dropdown hierarchy (3 levels):
+   *   Level 1 (left column): Publications under the category
+   *   Level 2 (middle column): Subjects under selected publication  
+   *   Level 3 (right column): Books under selected subject (routes to /book/:id)
+   */
+  const transformCategoryToMenuItem = (
+    category: MenuTreeCategory
+  ): MenuItemProps => {
+    const categoryHref =
+      category.route || (category.slug ? `/${category.slug}` : undefined);
+    // Build publications as children (level 1)
+    const children =
+      category.publications?.map((pub: MenuTreePublication) => {
+        const pubHref = categoryHref
+          ? `${categoryHref}/${pub.slug}`
+          : undefined;
+        // Build subjects as children (level 2)
+        const pubChildren =
+          pub.subjects?.map((subj: MenuTreeSubject) => {
+            const subjHref =
+              categoryHref && pub.slug
+                ? `${categoryHref}/${pub.slug}/${subj.slug}`
+                : undefined;
+                    // Build books as children (level 3) - use book ID for routing (app/book/[id])
+            const subjChildren = subj.books?.map((book: MenuTreeBook) => ({
+              name: book.title,
+              href: `/book/${book.id}`,
+              children: [],
+            })) || [];
+            return {
+              name: subj.name,
+              href: subjHref,
+              children: subjChildren,
+            };
+          }) || [];
+        return {
+          name: pub.name,
+          href: pubHref,
+          children: pubChildren,
+        };
+      }) || [];
+
+    // Fallback to children if no publications
+    if (children.length === 0 && category.children) {
+      return {
+        name: category.name,
+        href: categoryHref,
+        children: category.children.map((child) => ({
+          name: child.name,
+          href: child.route || (child.slug ? `/${child.slug}` : undefined),
+          children: [],
+        })),
+      };
+    }
+
     return {
       name: category.name,
-      href,
-      children: category.children?.map((child: Category) => transformCategoryToMenuItem(child)) || [],
+      href: categoryHref,
+      children,
     };
   };
 
+  // Filter out hidden categories
+  const visibleMenuTree = menuTree.filter((category) => !category.isHidden);
+
+  // Save count when we have data
+  useEffect(() => {
+    if (!isLoading && visibleMenuTree.length > 0) {
+      if (typeof window !== "undefined") {
+        localStorage.setItem(
+          "menuTreeVisibleCount",
+          visibleMenuTree.length.toString()
+        );
+      }
+    }
+  }, [isLoading, visibleMenuTree.length]);
+
+  const currentSkeletonCount =
+    isLoading && visibleMenuTree.length > 0
+      ? visibleMenuTree.length
+      : isLoading
+      ? skeletonCount
+      : 0;
+
   const navLinks = [
     { name: "Home", children: [], href: "/" },
-    ...(isLoading || error
-      ? [{ name: "Menu", children: [], isLoading, error: error?.message || null }]
-      : menuCategories.map(transformCategoryToMenuItem)),
+    ...(error
+      ? [{ name: "Menu", children: [], error: error?.message || null }]
+      : isLoading
+      ? Array.from({ length: Math.max(currentSkeletonCount, 3) }).map(
+          (_, i) => ({
+            name: `skeleton-${i}`,
+            children: [],
+            isLoading: true,
+          })
+        )
+      : visibleMenuTree.map(transformCategoryToMenuItem)),
   ] as MenuItemProps[];
 
   const toggleMobile = (key: string) => {
