@@ -31,6 +31,9 @@ export class ApiError extends Error {
   }
 }
 
+// Request timeout (ms) — prevents hung requests from spinning forever
+const REQUEST_TIMEOUT = 30_000;
+
 // Base request function
 async function request<T>(
   endpoint: string,
@@ -47,22 +50,76 @@ async function request<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  // Abort the request if it takes too long
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
-  const data = await response.json();
+  let response: Response;
+  try {
+    response = await fetch(`${BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+      signal: options.signal ?? controller.signal,
+    });
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new ApiError(
+        "The request timed out. Please try again.",
+        0,
+      );
+    }
+    throw new ApiError(
+      "Can't reach the server. Please check your connection and try again.",
+      0,
+    );
+  }
+  clearTimeout(timeoutId);
+
+  // Session expired: drop the dead token (and cached user)
+  if (response.status === 401 && typeof window !== "undefined") {
+    removeToken();
+    localStorage.removeItem("user");
+    // Data requests (GET): the session is dead — bounce to login.
+    // Mutations (cart, wishlist, …): surface a contextual message instead
+    // (e.g. "Please sign in to add items to your cart") and stay on the page.
+    const method = (options.method ?? "GET").toUpperCase();
+    if (method === "GET" && !window.location.pathname.startsWith("/login")) {
+      window.location.assign("/login");
+    }
+  }
+
+  // Parse the body safely — error pages (HTML) and empty 204 bodies are not JSON
+  const raw = await response.text();
+  let data: unknown = null;
+  if (raw) {
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      if (!response.ok) {
+        throw new ApiError(
+          "Something went wrong on our end. Please try again later.",
+          response.status,
+        );
+      }
+      // Successful response with a non-JSON body: hand it back untouched
+      return raw as unknown as ApiResponse<T>;
+    }
+  }
 
   if (!response.ok) {
+    const payload = (data ?? {}) as {
+      message?: string;
+      errors?: Array<{ field: string; message: string }>;
+    };
     throw new ApiError(
-      data.message || "An error occurred",
+      payload.message || "Something went wrong. Please try again.",
       response.status,
-      data.errors
+      payload.errors,
     );
   }
 
-  return data;
+  return data as ApiResponse<T>;
 }
 
 // API client

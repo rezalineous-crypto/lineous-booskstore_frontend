@@ -48,7 +48,7 @@ const WhyChooseUs = () => {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/15 text-gold mb-4">
             <Sparkles className="w-4 h-4" />
             <span className="text-xs font-bold tracking-widest uppercase">
-              Why Chroma Bookshelf
+              Why Core Learning Centre
             </span>
           </div>
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight">

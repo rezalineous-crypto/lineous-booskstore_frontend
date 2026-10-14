@@ -10,6 +10,7 @@ import { useSubjects } from "@/hooks/use-subjects";
 import { useCategory } from "@/hooks/use-categories";
 import { useBookTree } from "@/hooks/use-book-tree";
 import { Book } from "@/lib/types";
+import { getFriendlyErrorMessage } from "@/lib/error-messages";
 
 const BooksContent = () => {
   const router = useRouter();
@@ -82,7 +83,7 @@ const BooksContent = () => {
         <main className="pt-24 pb-16">
           <div className="container mx-auto px-4 lg:px-8 text-center">
             <h1 className="font-display text-2xl font-bold mb-4">Error Loading Books</h1>
-            <p className="text-muted-foreground mb-6">{error.message}</p>
+            <p className="text-muted-foreground mb-6">{getFriendlyErrorMessage(error)}</p>
             <Button onClick={() => router.push("/")}>Go Home</Button>
           </div>
         </main>

@@ -1,19 +1,13 @@
 import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { apiClient, ApiError } from "@/lib/api-client";
+import { apiClient } from "@/lib/api-client";
+import { getFriendlyErrorMessage, logError } from "@/lib/error-messages";
 
-// Utility function for handling API errors with sonner
+// Utility function for handling API errors with sonner.
+// Shows a friendly, user-safe message; technical details go to the console only.
 export const handleApiError = (error: unknown) => {
-  if (error instanceof ApiError) {
-    toast.error(error.message);
-    if (error.errors) {
-      error.errors.forEach((err) => {
-        toast.error(`${err.field}: ${err.message}`);
-      });
-    }
-  } else if (error instanceof Error) {
-    toast.error(error.message);
-  }
+  toast.error(getFriendlyErrorMessage(error));
+  logError(error);
 };
 
 // Base query hook with error handling

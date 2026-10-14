@@ -1,10 +1,9 @@
 "use client";
 import { motion } from "framer-motion";
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCartContext } from "@/contexts/CartContext";
-import { useSearchParams } from "next/navigation";
 import { Book } from "@/lib/types";
 
 interface BookCardProps {
@@ -15,8 +14,10 @@ interface BookCardProps {
 
 const BookCard = ({ book, delay = 0, categoryId }: BookCardProps) => {
   const { addToCart } = useCartContext();
-  const searchParams = useSearchParams();
-  const currentCategoryId = categoryId || searchParams.get("categoryId") || undefined;
+  // categoryId comes from the parent (listing pages pass it explicitly).
+  // Reading useSearchParams here would force a Suspense boundary on every
+  // page that renders a BookCard (including the homepage).
+  const currentCategoryId = categoryId;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();

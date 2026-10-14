@@ -76,20 +76,31 @@ const Footer = () => {
       {/* Main Footer */}
       <div className="container mx-auto px-4 lg:px-8 py-8 lg:py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 lg:gap-8">
-          {/* Brand */}
           <div className="col-span-2 md:col-span-4 lg:col-span-2">
-            <motion.a
-              href="#"
-              className="inline-block mb-4"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <img
-                src="/logowtext.png"
-                alt=""
-                className="w-24 h-24 lg:w-32 lg:h-32 invert"
-              />
-            </motion.a>
+          {/* Brand — same logo file and text style as the navbar */}
+          <motion.a
+            href="/"
+            className="inline-flex items-center gap-3 mb-4"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <img
+              src="/logo.png"
+              alt="Core Learning Centre"
+              className="w-12 h-12 object-contain"
+            />
+            <div className="hidden sm:block">
+              <span className="font-display text-xl font-semibold tracking-tight text-white">
+                Core
+              </span>
+              <span className="font-display text-xl font-semibold tracking-tight text-primary ml-1">
+                Learning
+              </span>
+              <span className="font-display text-xl font-semibold tracking-tight text-white ml-1">
+                Center
+              </span>
+            </div>
+          </motion.a>
          
             <div className="space-y-2 text-sm text-white/70">
               <div className="flex items-center gap-2">

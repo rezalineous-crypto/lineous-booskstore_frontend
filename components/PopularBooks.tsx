@@ -9,7 +9,9 @@ import Link from "next/link";
 export default function PopularBooks() {
   const { data: books = [], isLoading } = useBooks();
   
-  const popularBooks = books.slice(0, 6);
+  // Interim differentiation: distinct slice from NewReleases/Featured.
+  // Replace with a dedicated "popular" query once the backend supports it.
+  const popularBooks = books.slice(8, 14);
 
   if (isLoading) {
     return (

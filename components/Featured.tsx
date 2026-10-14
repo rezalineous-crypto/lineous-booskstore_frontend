@@ -10,7 +10,10 @@ import Link from "next/link";
 export default function Featured() {
   const { data: books = [], isLoading } = useBooks();
   
-  const featuredBooks = books.slice(0, 4);
+  // Interim differentiation: the API returns one list, so each home section
+  // shows a different slice. Replace with a dedicated "featured" query
+  // (flag or sort param) once the backend supports it.
+  const featuredBooks = books.slice(4, 8);
 
   if (isLoading) {
     return (

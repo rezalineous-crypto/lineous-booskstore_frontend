@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -25,62 +25,12 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useOrderContext } from "../../contexts/OrderContext";
 import { useOrders } from "../../hooks/use-orders";
 import { Order } from "@/lib/types";
+import { parsePrice, formatDate, getStatusColor } from "@/lib/order-utils";
 import {
   OrderFilters,
   DEFAULT_ORDER_FILTERS,
   OrderFilterState,
 } from "../../components/OrderFilters";
-
-// Helper to parse price values (string or number)
-const parsePrice = (value: string | number): number => {
-  return typeof value === "string" ? parseFloat(value) : value;
-};
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "PENDING":
-      return "bg-amber-100 text-amber-800 border-amber-200";
-    case "CONFIRMED":
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    case "PROCESSING":
-      return "bg-indigo-100 text-indigo-800 border-indigo-200";
-    case "SHIPPED":
-      return "bg-purple-100 text-purple-800 border-purple-200";
-    case "DELIVERED":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "CANCELLED":
-      return "bg-red-100 text-red-800 border-red-200";
-    case "RETURNED":
-      return "bg-orange-100 text-orange-800 border-orange-200";
-    default:
-      return "bg-muted text-muted-foreground";
-  }
-};
-
-const getPaymentColor = (status: string) => {
-  switch (status) {
-    case "COMPLETED":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "PENDING":
-      return "bg-amber-100 text-amber-800 border-amber-200";
-    case "FAILED":
-      return "bg-red-100 text-red-800 border-red-200";
-    case "REFUNDED":
-      return "bg-orange-100 text-orange-800 border-orange-200";
-    default:
-      return "bg-muted text-muted-foreground";
-  }
-};
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 const isToday = (dateString: string) => {
   const d = new Date(dateString);
@@ -259,8 +209,19 @@ const OrdersPage = () => {
   const { data: orders = [], isLoading } = useOrders(user?.id, filters.categoryId);
   const { downloadReceipt, isDownloading } = useOrderContext();
 
+  // Guests can't have orders — send them to login
+  useEffect(() => {
+    if (mounted && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [mounted, isAuthenticated, router]);
+
   if (!mounted || !isAuthenticated) {
-    return null;
+    return (
+      <div className="relative min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Redirecting to login…</p>
+      </div>
+    );
   }
 
   // Frontend filtering

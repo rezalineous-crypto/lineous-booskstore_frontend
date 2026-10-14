@@ -9,6 +9,7 @@ import { PackageCheck } from "lucide-react";
 export default function NewReleases() {
   const { data: books = [], isLoading } = useBooks();
   
+  // Newest arrivals: the API list is treated as newest-first.
   const newBooks = books.slice(0, 4);
 
   if (isLoading) {

@@ -58,7 +58,7 @@ const LoginPage = () => {
 
         await register(formData.email, formData.password, formData.name);
         toast.success("Account created!", {
-          description: "Welcome to BookHaven.",
+          description: "Welcome to Core Learning Centre.",
         });
         router.push("/");
       }

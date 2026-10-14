@@ -59,7 +59,7 @@ const CommunityCTA = () => {
           >
             <Quote className="w-10 h-10 text-gold/60 mb-6" />
             <p className="font-display text-2xl lg:text-3xl font-medium text-foreground leading-snug">
-              &ldquo;Chroma Bookshelf feels less like a store and more like a
+              &ldquo;Core Learning Centre feels less like a store and more like a
               friend who always knows the perfect book to hand you.&rdquo;
             </p>
             <div className="flex items-center gap-4 mt-8">

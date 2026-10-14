@@ -18,11 +18,7 @@ import {
   useReceiptPreview,
   useDownloadReceipt,
 } from "../../../hooks/use-orders";
-
-// Helper to parse price values (string or number)
-const parsePrice = (value: string | number): number => {
-  return typeof value === "string" ? parseFloat(value) : value;
-};
+import { parsePrice } from "@/lib/order-utils";
 
 function OrderSuccessContent() {
   const params = useSearchParams();
@@ -45,8 +41,14 @@ function OrderSuccessContent() {
     };
   }, [receiptUrl]);
 
+  // Redirect guests to login (in an effect, never during render)
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router]);
+
   if (!isAuthenticated) {
-    router.push("/login");
     return null;
   }
 

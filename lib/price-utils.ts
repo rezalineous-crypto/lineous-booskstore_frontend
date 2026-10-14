@@ -1,5 +1,14 @@
 import { BookPaper } from "./types";
 
+// Format a price (string | number) as BDT with 2 decimals, e.g. "৳350.00".
+// Centralized so float artifacts (0.30000000000000004) never reach the UI.
+export function formatPrice(value: string | number | null | undefined): string {
+  if (value === null || value === undefined) return "৳0.00";
+  const num = typeof value === "string" ? parseFloat(value) : value;
+  if (Number.isNaN(num)) return "৳0.00";
+  return `৳${num.toFixed(2)}`;
+}
+
 export function getEffectivePrice(paper: BookPaper | null): number {
   if (!paper) return 0;
 

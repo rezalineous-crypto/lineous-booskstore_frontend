@@ -5,7 +5,12 @@ import { apiClient } from "@/lib/api-client";
 import { Book } from "@/lib/types";
 
 // Get all books or books by subject/category/search
-export const useBooks = (subjectId?: string, categoryId?: string, search?: string) => {
+export const useBooks = (
+  subjectId?: string,
+  categoryId?: string,
+  search?: string,
+  enabled = true,
+) => {
   return useQuery<Book[], Error>({
     queryKey: ["books", subjectId, categoryId, search],
     queryFn: async () => {
@@ -19,6 +24,7 @@ export const useBooks = (subjectId?: string, categoryId?: string, search?: strin
       const response = await apiClient.get<Book[]>(url);
       return response.data;
     },
+    enabled,
   });
 };
 

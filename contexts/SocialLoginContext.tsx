@@ -1,7 +1,6 @@
 "use client";
 
 import React, { createContext, useContext, useCallback, ReactNode } from "react";
-import { useSocialLogin } from "@/hooks/use-social-login";
 import { useAuth } from "./AuthContext";
 import { SocialProfile, SocialLoginError } from "@/lib/social-login";
 
@@ -12,14 +11,14 @@ const SocialLoginContext = createContext<{
 } | null>(null);
 
 export const SocialLoginProvider = ({ children }: { children: ReactNode }) => {
-  const socialLoginMutation = useSocialLogin();
+  // AuthContext.socialLogin is the single owner of the social-login mutation.
+  // Calling the mutation here as well would fire a duplicate API request.
   const { socialLogin } = useAuth();
 
   const authenticate = useCallback(
     async (
       profile: SocialProfile & { provider: "GOOGLE" | "FACEBOOK" | "APPLE" },
     ) => {
-      const result = await socialLoginMutation.mutateAsync(profile);
       await socialLogin(
         profile.provider,
         profile.providerId,
@@ -29,7 +28,7 @@ export const SocialLoginProvider = ({ children }: { children: ReactNode }) => {
         profile.avatar,
       );
     },
-    [socialLoginMutation, socialLogin],
+    [socialLogin],
   );
 
   return (

@@ -13,6 +13,8 @@ export const useCart = (userId?: string) => {
       const response = await apiClient.get<Cart>("/cart");
       return response.data;
     },
+    // Cart is user-scoped: don't fire (and 401) for guests
+    enabled: !!userId,
   });
 };
 
@@ -30,6 +32,10 @@ export const useAddToCart = () => {
       toast.success("Book added to cart");
     },
     onError: (error) => {
+      if (error instanceof ApiError && error.statusCode === 401) {
+        toast.error("Please sign in to add items to your cart");
+        return;
+      }
       if (error instanceof ApiError) {
         toast.error(error.message);
       }
@@ -50,6 +56,10 @@ export const useUpdateCartItem = () => {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
     },
     onError: (error) => {
+      if (error instanceof ApiError && error.statusCode === 401) {
+        toast.error("Please sign in to update your cart");
+        return;
+      }
       if (error instanceof ApiError) {
         toast.error(error.message);
       }
@@ -70,6 +80,10 @@ export const useRemoveFromCart = () => {
       toast.success("Book removed from cart");
     },
     onError: (error) => {
+      if (error instanceof ApiError && error.statusCode === 401) {
+        toast.error("Please sign in to update your cart");
+        return;
+      }
       if (error instanceof ApiError) {
         toast.error(error.message);
       }
@@ -90,6 +104,10 @@ export const useClearCart = () => {
       // toast.success("Cart cleared");
     },
     onError: (error) => {
+      if (error instanceof ApiError && error.statusCode === 401) {
+        toast.error("Please sign in to update your cart");
+        return;
+      }
       if (error instanceof ApiError) {
         toast.error(error.message);
       }

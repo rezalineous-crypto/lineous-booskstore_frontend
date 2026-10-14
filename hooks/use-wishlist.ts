@@ -13,6 +13,8 @@ export const useWishlist = (userId?: string) => {
       const response = await apiClient.get<WishlistItem[]>("/wishlist");
       return response.data;
     },
+    // Wishlist is user-scoped: don't fire (and 401) for guests
+    enabled: !!userId,
   });
 };
 

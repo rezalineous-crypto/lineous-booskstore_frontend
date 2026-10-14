@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -60,16 +60,25 @@ const ProfilePage = () => {
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
 
+  // Redirect guests to login (in an effect, never during render)
+  useEffect(() => {
+    if (!isAuthenticated && !isLoggingOut) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, isLoggingOut, router]);
+
   if (!isAuthenticated && !isLoggingOut) {
-    router.push("/login");
     return null;
   }
 
   const handleSave = () => {
+    // NOTE: Profile updates are currently stored on this device only.
+    // A backend endpoint (e.g. PATCH /users/me) is needed to persist them
+    // server-side — call it here once the API is available.
     updateProfile(formData);
     setIsEditing(false);
-    toast.success("Profile updated", {
-      description: "Your changes have been saved successfully.",
+    toast.success("Profile saved", {
+      description: "Your changes have been saved on this device.",
     });
   };
 

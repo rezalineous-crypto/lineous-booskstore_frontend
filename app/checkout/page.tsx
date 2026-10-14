@@ -20,7 +20,6 @@ import { Label } from "../../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
 import { Separator } from "../../components/ui/separator";
 
-import Navbar from "../../components/Navbar";
 import { useCartContext } from "../../contexts/CartContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { useCreateOrder } from "../../hooks/use-orders";
@@ -28,11 +27,11 @@ import { useAddresses } from "../../hooks/use-addresses";
 import { AddressFormDialog } from "@/components/AddressFormDialog";
 import { Address } from "../../lib/types";
 import { toast } from "sonner";
-import { getEffectivePrice } from "@/lib/price-utils";
+import { getEffectivePrice, formatPrice } from "@/lib/price-utils";
 
 const CheckoutPage = () => {
   const { items, totalPrice, clearCart, isLoading: cartLoading } = useCartContext();
-  const { user } = useAuth();
+  const { user, mounted } = useAuth();
   const createOrderMutation = useCreateOrder();
   const { data: addresses = [], isLoading: addressesLoading } = useAddresses(user?.id);
   const router = useRouter();
@@ -54,10 +53,24 @@ const CheckoutPage = () => {
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId) || newlyCreatedAddress;
 
 
+  // Checkout requires an account — send guests to login
+  useEffect(() => {
+    if (mounted && !user) {
+      router.push("/login");
+    }
+  }, [mounted, user, router]);
+
+  if (!mounted || !user) {
+    return (
+      <div className="relative min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Redirecting to login…</p>
+      </div>
+    );
+  }
+
   if (items.length === 0 && !cartLoading) {
     return (
       <div className="relative min-h-screen bg-background overflow-hidden">
-        <Navbar />
         <div className="pt-32 text-center relative z-10">
           <h1 className="font-display text-2xl font-bold mb-4 text-heading">
             Your cart is empty
@@ -464,7 +477,7 @@ const CheckoutPage = () => {
                           Qty: {item.quantity}
                         </p>
                         <p className="font-semibold text-primary">
-                          ৳{getEffectivePrice(item.paper) * item.quantity}
+                          {formatPrice(getEffectivePrice(item.paper) * item.quantity)}
                         </p>
                       </div>
                     </div>
@@ -474,7 +487,7 @@ const CheckoutPage = () => {
                 <div className="space-y-3 pt-4 border-t border-border">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium text-foreground">৳{totalPrice}</span>
+                    <span className="font-medium text-foreground">{formatPrice(totalPrice)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
@@ -489,7 +502,7 @@ const CheckoutPage = () => {
                   <div className="flex justify-between text-lg font-bold">
                     <span className="text-foreground">Total</span>
                     <span className="text-primary">
-                      ৳{totalPrice.toFixed(2)}
+                      {formatPrice(totalPrice)}
                     </span>
                   </div>
                 </div>

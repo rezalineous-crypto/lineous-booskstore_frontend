@@ -20,7 +20,7 @@ import {
   Calendar,
   Globe,
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { useCartContext } from "@/contexts/CartContext";
 import { useBook } from "@/hooks/use-books";
+import { getEffectivePrice, formatPrice } from "@/lib/price-utils";
 
 const BookDetailsPage = () => {
   const params = useParams();
@@ -78,34 +79,6 @@ const BookDetailsPage = () => {
 
   // Get selected paper
   const selectedPaper = book?.papers?.find((p) => p.id === selectedPaperId);
-
-  // Helper to calculate effective price from paper
-  const getEffectivePrice = (paper: typeof selectedPaper): number => {
-    if (!paper) return 0;
-
-    if (paper.effectivePrice !== undefined) {
-      return paper.effectivePrice;
-    }
-
-    const price =
-      typeof paper.price === "string" ? parseFloat(paper.price) : paper.price;
-    const discountPrice = paper.discountPrice
-      ? typeof paper.discountPrice === "string"
-        ? parseFloat(paper.discountPrice)
-        : paper.discountPrice
-      : null;
-
-    if (discountPrice && paper.discountStartDate && paper.discountEndDate) {
-      const now = new Date();
-      const startDate = new Date(paper.discountStartDate);
-      const endDate = new Date(paper.discountEndDate);
-      if (now >= startDate && now <= endDate) {
-        return discountPrice;
-      }
-    }
-
-    return price;
-  };
 
   // Price display logic
   const getDisplayPrice = () => {
@@ -420,11 +393,11 @@ const BookDetailsPage = () => {
               {/* Price */}
               <div className="flex items-baseline gap-3 mb-6">
                 <span className="text-2xl sm:text-4xl font-bold text-primary">
-                  ৳{priceInfo.price}
+                  {formatPrice(priceInfo.price)}
                 </span>
                 {priceInfo.originalPrice && (
                   <span className="text-xl text-slate-500 line-through">
-                    ৳{priceInfo.originalPrice}
+                    {formatPrice(priceInfo.originalPrice)}
                   </span>
                 )}
               </div>
@@ -586,4 +559,31 @@ const BookDetailsPage = () => {
   );
 };
 
-export default BookDetailsPage;
+// useSearchParams() requires a Suspense boundary during static rendering
+export default function BookDetailsPageRoute() {
+  return (
+    <Suspense
+      fallback={
+        <div className="relative min-h-screen bg-white overflow-hidden">
+          <main className="pt-24 pb-16 relative z-10">
+            <div className="container mx-auto px-4 lg:px-8">
+              <div className="animate-pulse">
+                <div className="h-8 bg-slate-200 rounded mb-4 w-40" />
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="h-96 bg-slate-200 rounded-2xl" />
+                  <div className="space-y-4">
+                    <div className="h-12 bg-slate-200 rounded-xl" />
+                    <div className="h-6 bg-slate-200 rounded-xl w-3/4" />
+                    <div className="h-8 bg-slate-200 rounded-xl w-1/2" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      }
+    >
+      <BookDetailsPage />
+    </Suspense>
+  );
+}

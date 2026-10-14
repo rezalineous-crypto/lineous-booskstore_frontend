@@ -29,7 +29,12 @@ export const useSocialLogin = () => {
     },
     onSuccess: (data) => {
       setToken(data.accessToken);
-      queryClient.clear();
+      // Only refresh user-scoped data. Clearing the whole cache here would
+      // wipe public data (books, categories, menu tree) and cause refetch storms.
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
       queryClient.setQueryData(["user"], data.user);
     },
   });

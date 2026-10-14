@@ -16,11 +16,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useVerifyReceipt } from "@/hooks/use-orders";
-
-// Helper to parse price values (string or number)
-const parsePrice = (value: string | number): number => {
-  return typeof value === "string" ? parseFloat(value) : value;
-};
+import { getFriendlyErrorMessage } from "@/lib/error-messages";
+import { parsePrice } from "@/lib/order-utils";
 
 const ReceiptVerifyPage = () => {
   const params = useParams();
@@ -119,7 +116,7 @@ const ReceiptVerifyPage = () => {
                 Verification Failed
               </h2>
               <p className="text-slate-500 mb-2 max-w-md mx-auto">
-                {(error as Error).message}
+                {getFriendlyErrorMessage(error)}
               </p>
             </motion.div>
           )}

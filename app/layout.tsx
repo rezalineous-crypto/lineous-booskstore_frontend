@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${poppins.variable} ${poppinsDisplay.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${poppins.variable} ${poppinsDisplay.variable}`}>
       <body>
         <Providers>
           <div className="relative min-h-screen bg-white overflow-hidden">

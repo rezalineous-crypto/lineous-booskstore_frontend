@@ -115,6 +115,21 @@
   --input: #E5E7EB;
   --ring: #187D97;
   --radius: 0.75rem;
+
+  /* === EXTENDED BRAND TOKENS === */
+  /* Warm neutrals & accents referenced by legacy utility classes */
+  --charcoal: #0F172A;
+  --terracotta: #D97A07;
+  --terracotta-dark: #A95C00;
+  --forest: #0B4E63;
+  --forest-light: #187D97;
+  --gold: #D97A07;
+
+  /* Card shadows & brand gradients (referenced by utility classes) */
+  --shadow-card: 0 4px 20px -2px rgb(15 23 42 / 0.08);
+  --shadow-card-hover: 0 12px 32px -4px rgb(15 23 42 / 0.15);
+  --gradient-warm: linear-gradient(135deg, #D97A07 0%, #A95C00 100%);
+  --gradient-hero: linear-gradient(135deg, #187D97 0%, #0B4E63 100%);
 }
 
 .dark {
@@ -253,6 +268,18 @@
   --color-sidebar-accent-foreground: var(--foreground);
   --color-sidebar-border: var(--border);
   --color-sidebar-ring: var(--ring);
+
+  /* Extended brand tokens (legacy utility classes) */
+  --color-charcoal: var(--charcoal);
+  --color-terracotta: var(--terracotta);
+  --color-terracotta-dark: var(--terracotta-dark);
+  --color-forest: var(--forest);
+  --color-forest-light: var(--forest-light);
+  --color-gold: var(--gold);
+
+  /* Semantic text tokens */
+  --color-heading: var(--foreground);
+  --color-body: var(--muted-foreground);
 }
 
 @layer base {
@@ -261,8 +288,8 @@
   }
 
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background-color: var(--background);
+    color: var(--foreground);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
   }
@@ -394,5 +421,21 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* ── Top loader (route / data loading indicator) ── */
+@keyframes toploader-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+@layer utilities {
+  .animate-toploader-bar {
+    animation: toploader-slide 1.1s ease-in-out infinite;
   }
 }

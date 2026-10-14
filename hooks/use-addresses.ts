@@ -13,6 +13,8 @@ export const useAddresses = (userId?: string) => {
       const response = await apiClient.get<Address[]>("/addresses");
       return response.data;
     },
+    // Addresses are user-scoped: don't fire (and 401) for guests
+    enabled: !!userId,
   });
 };
 

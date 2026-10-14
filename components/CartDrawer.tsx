@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartContext } from "@/contexts/CartContext";
-import { getEffectivePrice } from "@/lib/price-utils";
+import { getEffectivePrice, formatPrice } from "@/lib/price-utils";
 import Link from "next/link";
 
 const CartDrawer = () => {
@@ -166,7 +166,9 @@ const CartDrawer = () => {
                               <div className="flex items-center border border-slate-200 rounded-lg bg-white">
                                 <button
                                   onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                  className="p-1.5 hover:bg-slate-50 transition-colors active:scale-95 text-slate-600"
+                                  disabled={item.quantity <= 1}
+                                  title={item.quantity <= 1 ? "Use the remove button to delete this item" : "Decrease quantity"}
+                                  className="p-1.5 hover:bg-slate-50 transition-colors active:scale-95 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:active:scale-100"
                                 >
                                   <Minus className="w-3 h-3" />
                                 </button>
@@ -181,7 +183,7 @@ const CartDrawer = () => {
                                 </button>
                               </div>
                               <span className="font-semibold text-primary">
-                                ৳{getEffectivePrice(item.paper) * item.quantity}
+                                {formatPrice(getEffectivePrice(item.paper) * item.quantity)}
                               </span>
                             </div>
                           </div>
@@ -205,7 +207,7 @@ const CartDrawer = () => {
                     <div className="flex justify-between items-center mb-4">
                       <span className="text-slate-500">Subtotal</span>
                       <span className="text-2xl font-bold text-slate-900">
-                        ৳{totalPrice}
+                        {formatPrice(totalPrice)}
                       </span>
                     </div>
                     <p className="text-sm text-slate-500 mb-4">

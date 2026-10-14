@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -19,47 +20,7 @@ import { Separator } from "../../../components/ui/separator";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useOrder } from "../../../hooks/use-orders";
 import { useOrderContext } from "../../../contexts/OrderContext";
-
-// Helper to parse price values (string or number)
-const parsePrice = (value: string | number): number => {
-  return typeof value === "string" ? parseFloat(value) : value;
-};
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "PENDING":
-      return "bg-amber-100 text-amber-800 border-amber-200";
-    case "CONFIRMED":
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    case "PROCESSING":
-      return "bg-indigo-100 text-indigo-800 border-indigo-200";
-    case "SHIPPED":
-      return "bg-purple-100 text-purple-800 border-purple-200";
-    case "DELIVERED":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "CANCELLED":
-      return "bg-red-100 text-red-800 border-red-200";
-    case "RETURNED":
-      return "bg-orange-100 text-orange-800 border-orange-200";
-    default:
-      return "bg-muted text-muted-foreground";
-  }
-};
-
-const getPaymentColor = (status: string) => {
-  switch (status) {
-    case "COMPLETED":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "PENDING":
-      return "bg-amber-100 text-amber-800 border-amber-200";
-    case "FAILED":
-      return "bg-red-100 text-red-800 border-red-200";
-    case "REFUNDED":
-      return "bg-orange-100 text-orange-800 border-orange-200";
-    default:
-      return "bg-muted text-muted-foreground";
-  }
-};
+import { parsePrice, formatDate, getStatusColor, getPaymentColor } from "@/lib/order-utils";
 
 const OrderDetailPage = () => {
   const params = useParams();
@@ -69,20 +30,16 @@ const OrderDetailPage = () => {
   const { data: order, isLoading, error } = useOrder(id);
   const { downloadReceipt, isDownloading } = useOrderContext();
 
+  // Redirect guests to login (in an effect, never during render)
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router]);
+
   if (!isAuthenticated) {
-    router.push("/login");
     return null;
   }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   if (isLoading) {
     return (

@@ -16,6 +16,8 @@ export const useOrders = (userId?: string, categoryId?: string) => {
       const response = await apiClient.get<Order[]>(url);
       return response.data;
     },
+    // Orders are user-scoped: don't fire (and 401) for guests
+    enabled: !!userId,
   });
 };
 
