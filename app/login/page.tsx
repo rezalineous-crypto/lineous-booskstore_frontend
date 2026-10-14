@@ -196,8 +196,8 @@ const LoginPage = () => {
             className="space-y-3 mb-8"
           >
             <GoogleButton onSuccess={() => router.push("/")} />
-            <FacebookButton onSuccess={() => router.push("/")} />
-            <AppleButton onSuccess={() => router.push("/")} />
+          {/**  <FacebookButton onSuccess={() => router.push("/")} />
+            <AppleButton onSuccess={() => router.push("/")} /> */}
           </motion.div>
 
           {/* Divider */}
