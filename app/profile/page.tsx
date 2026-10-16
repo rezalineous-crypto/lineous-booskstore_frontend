@@ -19,6 +19,8 @@ import {
   Plus,
   Pencil,
   Trash2,
+  Globe,
+  Users,
 } from "lucide-react";
 
 import { Input } from "../../components/ui/input";
@@ -59,6 +61,7 @@ const ProfilePage = () => {
 
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [linkedAccounts, setLinkedAccounts] = useState<{ provider: string; email: string }[]>([]);
 
   // Redirect guests to login (in an effect, never during render)
   useEffect(() => {
@@ -401,7 +404,15 @@ const ProfilePage = () => {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => handleDeleteAddress(addr.id)}
+                                onClick={() => {
+                                  if (
+                                    window.confirm(
+                                      "Are you sure you want to delete this address?"
+                                    )
+                                  ) {
+                                    handleDeleteAddress(addr.id);
+                                  }
+                                }}
                                 disabled={deleteAddressMutation.isPending}
                                 className="h-8 w-8 border border-slate-200 hover:bg-red-50 hover:text-red-700"
                               >
@@ -427,6 +438,61 @@ const ProfilePage = () => {
                       ))}
                     </div>
                   )}
+                </div>
+
+                {/* Social Accounts */}
+                <div className="bg-white rounded-2xl p-6 lg:p-8 border border-slate-200 shadow-sm">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="font-display text-xl font-semibold text-slate-900">
+                      Social Accounts
+                    </h2>
+                  </div>
+                  <p className="text-sm text-slate-500 mb-6">
+                    Link your social accounts for faster login
+                  </p>
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    {[
+                      { provider: "Google", icon: Globe, color: "bg-red-500 text-white" },
+                      { provider: "Facebook", icon: Users, color: "bg-blue-600 text-white" },
+                      { provider: "Apple", icon: User, color: "bg-black text-white" },
+                    ].map((social) => {
+                      const isLinked = linkedAccounts.some(
+                        (a) => a.provider === social.provider
+                      );
+                      return (
+                        <button
+                          key={social.provider}
+                          onClick={() => {
+                            if (!isLinked) {
+                              setLinkedAccounts([
+                                ...linkedAccounts,
+                                { provider: social.provider, email: user?.email || "" },
+                              ]);
+                              toast.success(
+                                `${social.provider} account linked`
+                              );
+                            }
+                          }}
+                          disabled={isLinked}
+                          className={`flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all ${
+                            isLinked
+                              ? "border-green-200 bg-green-50 text-green-600"
+                              : "border-slate-200 hover:border-primary/40 hover:bg-primary/5"
+                          }`}
+                        >
+                          <social.icon className={`w-8 h-8 mb-3 ${social.color}`} />
+                          <span className="font-medium text-sm">
+                            {social.provider}
+                          </span>
+                          {isLinked && (
+                            <span className="text-xs text-green-600 mt-1">
+                              Linked
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </motion.div>
             </div>

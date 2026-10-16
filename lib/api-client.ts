@@ -11,11 +11,14 @@ export const getToken = (): string | null => {
 export const setToken = (token: string): void => {
   if (typeof window === "undefined") return;
   localStorage.setItem("accessToken", token);
+  // Also set a cookie so Next.js middleware can read it for route protection
+  document.cookie = `accessToken=${token}; path=/; max-age=604800; sameSite=lax`;
 };
 
 export const removeToken = (): void => {
   if (typeof window === "undefined") return;
   localStorage.removeItem("accessToken");
+  document.cookie = "accessToken=; path=/; max-age=0";
 };
 
 // API Error class
@@ -80,12 +83,9 @@ async function request<T>(
   if (response.status === 401 && typeof window !== "undefined") {
     removeToken();
     localStorage.removeItem("user");
-    // Data requests (GET): the session is dead — bounce to login.
-    // Mutations (cart, wishlist, …): surface a contextual message instead
-    // (e.g. "Please sign in to add items to your cart") and stay on the page.
-    const method = (options.method ?? "GET").toUpperCase();
-    if (method === "GET" && !window.location.pathname.startsWith("/login")) {
-      window.location.assign("/login");
+    if (!window.location.pathname.startsWith("/login")) {
+      const callbackUrl = window.location.pathname;
+      window.location.assign(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
   }
 

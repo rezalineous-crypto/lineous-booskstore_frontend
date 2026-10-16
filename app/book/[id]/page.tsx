@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft,
   Star,
-  Heart,
   ShoppingCart,
   Minus,
   Plus,
@@ -79,6 +78,9 @@ const BookDetailsPage = () => {
 
   // Get selected paper
   const selectedPaper = book?.papers?.find((p) => p.id === selectedPaperId);
+
+  // Max quantity based on stock
+  const maxQuantity = selectedPaper?.stock != null ? selectedPaper.stock : 99;
 
   // Price display logic
   const getDisplayPrice = () => {
@@ -415,12 +417,18 @@ const BookDetailsPage = () => {
                     {quantity}
                   </span>
                   <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="p-3 hover:bg-slate-50 transition-colors active:scale-95 text-slate-600"
+                    onClick={() => setQuantity((q) => Math.min(q + 1, maxQuantity))}
+                    disabled={quantity >= maxQuantity}
+                    className="p-3 hover:bg-slate-50 transition-colors active:scale-95 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
+                {maxQuantity > 0 && quantity >= maxQuantity * 0.8 && (
+                  <p className="text-xs text-orange-600 mt-1">
+                    Only {maxQuantity - quantity} left in stock
+                  </p>
+                )}
 
                 <Button
                   size="lg"
@@ -431,13 +439,6 @@ const BookDetailsPage = () => {
                   Add to Cart
                 </Button>
 
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="active:scale-95 transition-transform bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300"
-                >
-                  <Heart className="w-5 h-5" />
-                </Button>
               </div>
 
               {/* Features */}

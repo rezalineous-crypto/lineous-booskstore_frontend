@@ -1,8 +1,12 @@
 "use client";
 
+"use client";
+import { useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
 import heroImage from "@/assets/hero-bookstore.jpg";
 
 // ─── Floating Book Card Component ────────────────────────
@@ -42,6 +46,8 @@ export default function HeroBanner() {
   const { scrollY } = useScroll();
   const bgY = useTransform(scrollY, [0, 500], [0, 150]);
   const opacity = useTransform(scrollY, [0, 400], [1, 0.3]);
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -136,6 +142,39 @@ export default function HeroBanner() {
               Explore our curated collection of bestsellers, hidden gems, and
               timeless classics. Every book tells a story worth experiencing.
             </motion.p>
+
+            {/* Search Bar */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.7 }}
+              className="mb-10 max-w-lg"
+            >
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (searchQuery.trim()) {
+                    router.push(`/books?search=${encodeURIComponent(searchQuery.trim())}`);
+                  }
+                }}
+                className="flex gap-2"
+              >
+                <Input
+                  placeholder="Search books, authors, or topics..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="h-14 px-8 rounded-2xl bg-primary hover:bg-primary/90 text-white text-base font-semibold shadow-xl shadow-primary/20 hover:shadow-2xl transition-all duration-300"
+                >
+                  <Search className="w-5 h-5 mr-2" />
+                  Search
+                </Button>
+              </form>
+            </motion.div>
 
             {/* CTAs */}
             <motion.div

@@ -25,7 +25,7 @@ import { parsePrice, formatDate, getStatusColor, getPaymentColor } from "@/lib/o
 const OrderDetailPage = () => {
   const params = useParams();
   const id = params?.id as string;
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const router = useRouter();
   const { data: order, isLoading, error } = useOrder(id);
   const { downloadReceipt, isDownloading } = useOrderContext();
@@ -36,6 +36,13 @@ const OrderDetailPage = () => {
       router.push("/login");
     }
   }, [isAuthenticated, router]);
+
+  // Redirect if the order does not belong to the current user
+  useEffect(() => {
+    if (order && order.userId && order.userId !== user?.id) {
+      router.push("/orders");
+    }
+  }, [order, user, router]);
 
   if (!isAuthenticated) {
     return null;

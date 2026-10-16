@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -31,52 +31,53 @@ export const AddressFormDialog = ({
   initialAddress,
   onSuccess,
 }: AddressFormDialogProps) => {
-  const [addressForm, setAddressForm] = useState({
-    name: "",
-    phone: "",
-    country: "",
-    division: "",
-    district: "",
-    area: "",
-    addressLine: "",
-    postalCode: "",
-    isDefault: false,
-  });
+  const [userEdits, setUserEdits] = useState<Record<string, string | boolean>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const baseForm = useMemo(() => {
+    if (initialAddress) {
+      return {
+        name: initialAddress.name,
+        phone: initialAddress.phone,
+        country: initialAddress.country || "",
+        division: initialAddress.division || "",
+        district: initialAddress.district,
+        area: initialAddress.area || "",
+        addressLine: initialAddress.addressLine,
+        postalCode: initialAddress.postalCode || "",
+        isDefault: initialAddress.isDefault,
+      };
+    }
+    return {
+      name: "",
+      phone: "",
+      country: "",
+      division: "",
+      district: "",
+      area: "",
+      addressLine: "",
+      postalCode: "",
+      isDefault: false,
+    };
+  }, [initialAddress]);
+
+  const addressForm = { ...baseForm, ...userEdits };
+
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    if (!addressForm.name.trim()) newErrors.name = "Full name is required";
+    if (!addressForm.phone.trim()) newErrors.phone = "Phone number is required";
+    if (!addressForm.district.trim()) newErrors.district = "District is required";
+    if (!addressForm.addressLine.trim()) newErrors.addressLine = "Address line is required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const createAddressMutation = useCreateAddress();
   const updateAddressMutation = useUpdateAddress();
 
-  useEffect(() => {
-    if (open) {
-      if (initialAddress) {
-        setAddressForm({
-          name: initialAddress.name,
-          phone: initialAddress.phone,
-          country: initialAddress.country || "",
-          division: initialAddress.division || "",
-          district: initialAddress.district,
-          area: initialAddress.area || "",
-          addressLine: initialAddress.addressLine,
-          postalCode: initialAddress.postalCode || "",
-          isDefault: initialAddress.isDefault,
-        });
-      } else {
-        setAddressForm({
-          name: "",
-          phone: "",
-          country: "",
-          division: "",
-          district: "",
-          area: "",
-          addressLine: "",
-          postalCode: "",
-          isDefault: false,
-        });
-      }
-    }
-  }, [open, initialAddress?.id]);
-
   const handleSubmit = async () => {
+    if (!validate()) return;
     try {
       let savedAddress: Address;
       if (initialAddress) {
@@ -114,22 +115,30 @@ export const AddressFormDialog = ({
               <Input
                 id="addr-name"
                 value={addressForm.name}
-                onChange={(e) =>
-                  setAddressForm({ ...addressForm, name: e.target.value })
-                }
+                  onChange={(e) =>
+                    setUserEdits({ ...userEdits, name: e.target.value })
+                  }
                 placeholder="Enter full name"
+                className={errors.name ? "border-red-500 focus:border-red-500" : ""}
               />
+              {errors.name && (
+                <p className="text-xs text-red-500">{errors.name}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="addr-phone">Phone Number</Label>
               <Input
                 id="addr-phone"
                 value={addressForm.phone}
-                onChange={(e) =>
-                  setAddressForm({ ...addressForm, phone: e.target.value })
-                }
+                  onChange={(e) =>
+                    setUserEdits({ ...userEdits, phone: e.target.value })
+                  }
                 placeholder="Enter phone number"
+                className={errors.phone ? "border-red-500 focus:border-red-500" : ""}
               />
+              {errors.phone && (
+                <p className="text-xs text-red-500">{errors.phone}</p>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -138,9 +147,9 @@ export const AddressFormDialog = ({
               <Input
                 id="addr-country"
                 value={addressForm.country}
-                onChange={(e) =>
-                  setAddressForm({ ...addressForm, country: e.target.value })
-                }
+                  onChange={(e) =>
+                    setUserEdits({ ...userEdits, country: e.target.value })
+                  }
                 placeholder="Enter country"
               />
             </div>
@@ -149,9 +158,9 @@ export const AddressFormDialog = ({
               <Input
                 id="addr-division"
                 value={addressForm.division}
-                onChange={(e) =>
-                  setAddressForm({ ...addressForm, division: e.target.value })
-                }
+                  onChange={(e) =>
+                    setUserEdits({ ...userEdits, division: e.target.value })
+                  }
                 placeholder="Enter division"
               />
             </div>
@@ -162,20 +171,24 @@ export const AddressFormDialog = ({
               <Input
                 id="addr-district"
                 value={addressForm.district}
-                onChange={(e) =>
-                  setAddressForm({ ...addressForm, district: e.target.value })
-                }
+                  onChange={(e) =>
+                    setUserEdits({ ...userEdits, district: e.target.value })
+                  }
                 placeholder="Enter district"
+                className={errors.district ? "border-red-500 focus:border-red-500" : ""}
               />
+              {errors.district && (
+                <p className="text-xs text-red-500">{errors.district}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="addr-area">Area</Label>
               <Input
                 id="addr-area"
                 value={addressForm.area}
-                onChange={(e) =>
-                  setAddressForm({ ...addressForm, area: e.target.value })
-                }
+                  onChange={(e) =>
+                    setUserEdits({ ...userEdits, area: e.target.value })
+                  }
                 placeholder="Enter area"
               />
             </div>
@@ -185,12 +198,16 @@ export const AddressFormDialog = ({
             <Textarea
               id="addr-line"
               value={addressForm.addressLine}
-              onChange={(e) =>
-                setAddressForm({ ...addressForm, addressLine: e.target.value })
-              }
+                onChange={(e) =>
+                  setUserEdits({ ...userEdits, addressLine: e.target.value })
+                }
               placeholder="Enter full address"
               rows={3}
+              className={errors.addressLine ? "border-red-500 focus:border-red-500" : ""}
             />
+            {errors.addressLine && (
+              <p className="text-xs text-red-500">{errors.addressLine}</p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -198,9 +215,9 @@ export const AddressFormDialog = ({
               <Input
                 id="addr-postal"
                 value={addressForm.postalCode}
-                onChange={(e) =>
-                  setAddressForm({ ...addressForm, postalCode: e.target.value })
-                }
+                  onChange={(e) =>
+                    setUserEdits({ ...userEdits, postalCode: e.target.value })
+                  }
                 placeholder="Enter postal code"
               />
             </div>
@@ -210,8 +227,8 @@ export const AddressFormDialog = ({
                   id="addr-default"
                   checked={addressForm.isDefault}
                   onCheckedChange={(checked) =>
-                    setAddressForm({
-                      ...addressForm,
+                    setUserEdits({
+                      ...userEdits,
                       isDefault: checked as boolean,
                     })
                   }

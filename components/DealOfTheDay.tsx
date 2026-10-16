@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, ShoppingCart, Heart, Star, Flame, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function DealOfTheDay() {
+  const { isAuthenticated } = useAuth();
   const [timeLeft, setTimeLeft] = useState({
     hours: 12,
     minutes: 45,
@@ -81,7 +83,7 @@ export default function DealOfTheDay() {
             Deal of the Day
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Exclusive discounts on handpicked books – grab them before they're gone!
+            Exclusive discounts on handpicked books – grab them before they are gone!
           </p>
         </motion.div>
 
@@ -184,10 +186,12 @@ export default function DealOfTheDay() {
                 <ShoppingCart className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 Add to Cart
               </Button>
-              <Button variant="outline" size="lg" className="h-14 rounded-2xl font-semibold">
-                <Heart className="w-5 h-5" />
-                Wishlist
-              </Button>
+              {isAuthenticated && (
+                <Button variant="outline" size="lg" className="h-14 rounded-2xl font-semibold">
+                  <Heart className="w-5 h-5" />
+                  Wishlist
+                </Button>
+              )}
             </div>
           </motion.div>
         </div>

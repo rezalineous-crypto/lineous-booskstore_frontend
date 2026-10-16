@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -18,16 +18,29 @@ import { Button } from "@/components/ui/button";
 import { useVerifyReceipt } from "@/hooks/use-orders";
 import { getFriendlyErrorMessage } from "@/lib/error-messages";
 import { parsePrice } from "@/lib/order-utils";
+import { useAuth } from "../../../../contexts/AuthContext";
 
 const ReceiptVerifyPage = () => {
   const params = useParams();
   const receiptNumber = params?.receiptNumber as string | undefined;
   const router = useRouter();
   const [input, setInput] = useState("");
+  const { isAuthenticated, mounted } = useAuth();
 
   const { data: receipt, isLoading, error } = useVerifyReceipt(
     receiptNumber || ""
   );
+
+  // Redirect guests to login (in an effect, never during render)
+  useEffect(() => {
+    if (mounted && !isAuthenticated) {
+      router.push(`/login?callbackUrl=/receipts/verify/${receiptNumber}`);
+    }
+  }, [mounted, isAuthenticated, router, receiptNumber]);
+
+  if (!mounted || !isAuthenticated) {
+    return null;
+  }
 
   const handleVerify = (e: React.FormEvent) => {
     e.preventDefault();

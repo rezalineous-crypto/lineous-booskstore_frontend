@@ -71,6 +71,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const registerMutation = useRegister();
   const socialLoginMutation = useSocialLogin();
 
+  // useSyncExternalStore for hydration-safe isHydrating state
+  // Server: true (hydrating), Client: false (not hydrating)
+  const isHydrating = useSyncExternalStore(
+    () => () => {},
+    () => false,
+    () => true
+  );
+
   // Save user to localStorage when it changes
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -167,8 +175,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
-        mounted,
+        isAuthenticated: !isHydrating && !!user,
+        mounted: !isHydrating,
         login,
         register,
         logout,

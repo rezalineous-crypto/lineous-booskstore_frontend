@@ -33,6 +33,7 @@ export interface MenuItemProps {
   isLoading?: boolean;
   error?: string | null;
   href?: string;
+  onRetry?: () => void;
 }
 
 interface MenuItemComponentProps {
@@ -142,6 +143,15 @@ const MenuItem = ({
                   ) : error ? (
                     <div className="text-center py-4">
                       <p className="text-xs text-red-500">{error}</p>
+                      {item.onRetry && (
+                        <Button
+                          size="sm"
+                          onClick={item.onRetry}
+                          className="mt-2 bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1.5 rounded"
+                        >
+                          Retry
+                        </Button>
+                      )}
                     </div>
                   ) : (
                     item.children!.map(
@@ -232,8 +242,17 @@ const MenuItem = ({
                     <Loader2 className="w-6 h-6 animate-spin text-foreground/40" />
                   </div>
                 ) : error ? (
-                  <div className="flex items-center justify-center w-full p-8">
-                    <p className="text-sm text-red-500">{error}</p>
+                  <div className="flex flex-col items-center justify-center w-full p-8">
+                    <p className="text-sm text-red-500 mb-2">{error}</p>
+                    {item.onRetry && (
+                      <Button
+                        size="sm"
+                        onClick={item.onRetry}
+                        className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1.5 rounded"
+                      >
+                        Retry
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   <>
@@ -548,7 +567,7 @@ const Navbar = () => {
   const { isAuthenticated, mounted } = useAuth();
   const navigate = useRouter();
   const pathname = usePathname();
-  const { data: menuTree = [], isLoading, error } = useCategoriesMenuTree();
+  const { data: menuTree = [], isLoading, error, refetch: refetchMenuTree } = useCategoriesMenuTree();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -648,7 +667,7 @@ const Navbar = () => {
   const navLinks = [
     { name: "Home", children: [], href: "/" },
     ...(error
-      ? [{ name: "Menu", children: [], error: error?.message || null }]
+      ? [{ name: "Menu", children: [], error: error?.message || null, onRetry: refetchMenuTree }]
       : isLoading
       ? Array.from({ length: Math.max(currentSkeletonCount, 3) }).map(
           (_, i) => ({
