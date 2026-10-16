@@ -876,9 +876,15 @@ const IconButton = ({
   >
     {icon}
     {badge !== undefined && badge > 0 && (
-      <span className="absolute -top-0.5 -right-0.5 h-[18px] min-w-[18px] px-1 text-[10px] font-semibold bg-orange-500 text-primary-foreground rounded-full flex items-center justify-center shadow-sm shadow-primary/30">
+      <motion.span
+        key={badge}
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", damping: 12, stiffness: 120 }}
+        className="absolute -top-0.5 -right-0.5 h-[18px] min-w-[18px] px-1 text-[10px] font-semibold bg-orange-500 text-primary-foreground rounded-full flex items-center justify-center shadow-sm shadow-primary/30"
+      >
         {badge}
-      </span>
+      </motion.span>
     )}
   </button>
 );

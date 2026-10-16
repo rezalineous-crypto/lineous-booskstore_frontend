@@ -18,6 +18,7 @@ import {
   Hash,
   Calendar,
   Globe,
+  Loader2,
 } from "lucide-react";
 import { useState, useEffect, useRef, Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +39,7 @@ const BookDetailsPage = () => {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { addToCart } = useCartContext();
+  const { addToCart, isAddingToCart } = useCartContext();
   const [quantity, setQuantity] = useState(1);
   const [selectedPaperId, setSelectedPaperId] = useState<string | null>(null);
   const initializedRef = useRef(false);
@@ -304,7 +305,7 @@ const BookDetailsPage = () => {
                       setQuantity(1);
                     }}
                   >
-                    <SelectTrigger className="w-full bg-white border-slate-200 focus:ring-primary/20">
+                    <SelectTrigger className="w-full bg-white border-orange-500 focus:ring-orange-600 cursor-pointer hover:bg-orange-100">
                       <SelectValue placeholder="Choose a format" />
                     </SelectTrigger>
                     <SelectContent>
@@ -432,11 +433,16 @@ const BookDetailsPage = () => {
 
                 <Button
                   size="lg"
+                  disabled={isAddingToCart}
                   className="flex-1 active:scale-95 transition-transform py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl border border-primary/20 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30"
                   onClick={handleAddToCart}
                 >
-                  <ShoppingCart className="w-5 h-5 mr-2" />
-                  Add to Cart
+                  {isAddingToCart ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <ShoppingCart className="w-5 h-5 mr-2" />
+                  )}
+                  {isAddingToCart ? "Adding..." : "Add to Cart"}
                 </Button>
 
               </div>

@@ -17,6 +17,7 @@ interface CartContextType {
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
   isLoading: boolean;
+  isAddingToCart: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -25,7 +26,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { user, mounted } = useAuth();
   const { data: cart, isLoading } = useCart(user?.id);
-  const { mutate: addToCartMutate } = useAddToCart();
+  const { mutate: addToCartMutate, isPending: isAddingToCart } = useAddToCart();
   const { mutate: updateCartItemMutate } = useUpdateCartItem();
   const { mutate: removeFromCartMutate } = useRemoveFromCart();
   const { mutate: clearCartMutate } = useClearCart();
@@ -68,6 +69,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         isCartOpen,
         setIsCartOpen,
         isLoading: isCartLoading,
+        isAddingToCart,
       }}
     >
       {children}
