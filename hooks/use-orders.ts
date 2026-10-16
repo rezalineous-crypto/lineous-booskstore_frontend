@@ -5,19 +5,79 @@ import { toast } from "sonner";
 import { apiClient, ApiError, getToken, BASE_URL } from "@/lib/api-client";
 import { Order, Receipt } from "@/lib/types";
 
-// Get all orders
-export const useOrders = (userId?: string, categoryId?: string) => {
-  return useQuery<Order[], Error>({
-    queryKey: ["orders", userId, categoryId],
+// Get all orders (paginated)
+export interface OrdersResponse {
+  orders: Order[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
+
+export const useOrders = (userId?: string, categoryId?: string, page = 1, limit = 20) => {
+  return useQuery<OrdersResponse, Error>({
+    queryKey: ["orders", userId, categoryId, page, limit],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (categoryId) params.append("categoryId", categoryId);
-      const url = params.toString() ? `/orders?${params.toString()}` : "/orders";
+      params.append("page", String(page));
+      params.append("limit", String(limit));
+      const url = `/orders?${params.toString()}`;
       const response = await apiClient.get<Order[]>(url);
-      return response.data;
+      const data = response.data as unknown as { data?: Order[]; meta?: OrdersResponse["meta"] };
+      return {
+        orders: Array.isArray(data) ? data : (data?.data || []),
+        meta: data?.meta || { page, limit, total: 0, pages: 1 },
+      };
     },
     // Orders are user-scoped: don't fire (and 401) for guests
     enabled: !!userId,
+  });
+};
+
+// Cancel order
+export const useCancelOrder = () => {
+  const queryClient = useQueryClient();
+  return useMutation<Order, Error, string>({
+    mutationFn: async (orderId: string) => {
+      const response = await apiClient.post<Order>(`/orders/${orderId}/cancel`, {});
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      toast.success("Order cancelled successfully");
+    },
+    onError: (error) => {
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to cancel order");
+      }
+    },
+  });
+};
+
+// Return order
+export const useReturnOrder = () => {
+  const queryClient = useQueryClient();
+  return useMutation<Order, Error, string>({
+    mutationFn: async (orderId: string) => {
+      const response = await apiClient.post<Order>(`/orders/${orderId}/return`, {});
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      toast.success("Order return requested successfully");
+    },
+    onError: (error) => {
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to request return");
+      }
+    },
   });
 };
 

@@ -12,7 +12,7 @@ import React, {
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLogin, useRegister } from "@/hooks/use-auth";
-import { removeToken, setToken } from "@/lib/api-client";
+import { removeToken, setToken, setRefreshToken, removeRefreshToken, clearAuthTokens, apiClient } from "@/lib/api-client";
 import { AuthUser, AuthResponse } from "@/lib/types";
 import { useSocialLogin, type SocialProvider } from "@/hooks/use-social-login";
 
@@ -99,6 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       };
       setUser(userData);
       setToken(result.accessToken);
+      if (result.refreshToken) setRefreshToken(result.refreshToken);
       return result;
     },
     [loginMutation],
@@ -113,14 +114,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       };
       setUser(userData);
       setToken(result.accessToken);
+      if (result.refreshToken) setRefreshToken(result.refreshToken);
       return result;
     },
     [registerMutation],
   );
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await apiClient.post("/auth/logout", {});
+    } catch {
+      // Ignore errors — still clear local state
+    }
     setUser(null);
-    removeToken();
+    clearAuthTokens();
     queryClient.clear();
   }, [queryClient]);
 
@@ -163,6 +170,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setUser(userData);
       setToken(result.accessToken);
+      if (result.refreshToken) setRefreshToken(result.refreshToken);
       return result;
     },
     [socialLoginMutation],

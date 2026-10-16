@@ -144,7 +144,7 @@ export default function HeroBanner() {
             </motion.p>
 
             {/* Search Bar */}
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.7 }}
@@ -174,7 +174,7 @@ export default function HeroBanner() {
                   Search
                 </Button>
               </form>
-            </motion.div>
+            </motion.div> */}
 
             {/* CTAs */}
             <motion.div

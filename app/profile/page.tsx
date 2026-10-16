@@ -37,6 +37,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useAddresses, useCreateAddress, useUpdateAddress, useDeleteAddress } from "../../hooks/use-addresses";
 import { Address } from "@/lib/types";
 import { toast } from "sonner";
+import { apiClient } from "@/lib/api-client";
 import LogoutLoader from "@/components/LogoutLoader";
 
 const ProfilePage = () => {
@@ -74,15 +75,29 @@ const ProfilePage = () => {
     return null;
   }
 
-  const handleSave = () => {
-    // NOTE: Profile updates are currently stored on this device only.
-    // A backend endpoint (e.g. PATCH /users/me) is needed to persist them
-    // server-side — call it here once the API is available.
-    updateProfile(formData);
-    setIsEditing(false);
-    toast.success("Profile saved", {
-      description: "Your changes have been saved on this device.",
-    });
+  const handleSave = async () => {
+    try {
+      const response = await apiClient.patch("/users/me", {
+        firstName: formData.name.split(" ")[0] || "",
+        lastName: formData.name.split(" ").slice(1).join(" ") || "",
+        email: formData.email,
+        phone: formData.phone,
+        bio: formData.bio,
+      });
+      const updatedUser = response.data as { firstName?: string; lastName?: string; email?: string; phone?: string; bio?: string };
+      updateProfile({
+        name: `${updatedUser.firstName || ""} ${updatedUser.lastName || ""}`.trim() || formData.name,
+        email: updatedUser.email || formData.email,
+        phone: updatedUser.phone || formData.phone,
+        bio: updatedUser.bio || formData.bio,
+      });
+      setIsEditing(false);
+      toast.success("Profile saved", {
+        description: "Your changes have been saved.",
+      });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to save profile");
+    }
   };
 
   const handleLogout = () => {

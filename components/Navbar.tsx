@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 
@@ -228,7 +229,7 @@ const MenuItem = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
-              className="absolute top-full left-1/2 -translate-x-1/2 mt-2 rounded-xl shadow-xl border border-slate-200 bg-white/95 backdrop-blur-md z-50 p-6 min-w-[640px] min-h-[300px] overflow-hidden"
+              className="absolute top-full left-1/2 -translate-x-1/2 mt-2 rounded-xl shadow-xl border border-slate-200 bg-white/95 backdrop-blur-md z-50 p-6 min-w-160 min-h-75 overflow-hidden"
               onMouseEnter={() => setSubMenuHovered(true)}
               onMouseLeave={() => {
                 setSubMenuHovered(false);
@@ -257,7 +258,7 @@ const MenuItem = ({
                 ) : (
                   <>
                     {/* Level 1: Publications */}
-                    <div className="flex flex-col min-w-[160px]">
+                    <div className="flex flex-col min-w-40">
                       {item.children!.map(
                         (child: MenuItemProps | string, idx: number) => {
                           const childItem =
@@ -297,7 +298,7 @@ const MenuItem = ({
                     </div>
 
                     {/* Level 2: Subjects */}
-                    <div className="relative w-[200px] border-l border-slate-200">
+                    <div className="relative w-50 border-l border-slate-200">
                       <AnimatePresence initial={false}>
                         {activeChild &&
                         activeChild.children &&
@@ -313,7 +314,7 @@ const MenuItem = ({
                             <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 px-3 pt-1">
                               {/* {activeChild.name} */}
                             </h3>
-                            <div className="space-y-0.5 max-h-[300px] overflow-y-auto">
+                            <div className="space-y-0.5 max-h-75 overflow-y-auto">
                               {activeChild.children!.map(
                                 (
                                   child: MenuItemProps | string,
@@ -377,7 +378,7 @@ const MenuItem = ({
                     </div>
 
                     {/* Level 3: Books */}
-                    <div className="relative w-[240px] border-l border-slate-200">
+                    <div className="relative w-60 border-l border-slate-200">
                       <AnimatePresence initial={false}>
                         {activeGrandchild &&
                         activeGrandchild.children &&
@@ -395,7 +396,7 @@ const MenuItem = ({
                             <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 px-3 pt-1">
                               {/* {activeGrandchild.name} */}
                             </h3>
-                            <div className="space-y-0.5 max-h-[300px] overflow-y-auto">
+                            <div className="space-y-0.5 max-h-75 overflow-y-auto">
                               {activeGrandchild.children!.map(
                                 (
                                   child: MenuItemProps | string,
@@ -567,7 +568,9 @@ const Navbar = () => {
   const { isAuthenticated, mounted } = useAuth();
   const navigate = useRouter();
   const pathname = usePathname();
-  const { data: menuTree = [], isLoading, error, refetch: refetchMenuTree } = useCategoriesMenuTree();
+  const { data: menuTree = [], isLoading: queryLoading, error, refetch: refetchMenuTree } = useCategoriesMenuTree();
+  // Ensure consistent loading state between server and client to avoid hydration mismatch
+  const isLoading = !mounted || queryLoading;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

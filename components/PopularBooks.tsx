@@ -7,7 +7,8 @@ import { useBooks } from "@/hooks/use-books";
 import Link from "next/link";
 
 export default function PopularBooks() {
-  const { data: books = [], isLoading } = useBooks();
+  const { data, isLoading } = useBooks();
+  const books = data?.books ?? [];
   
   // Interim differentiation: distinct slice from NewReleases/Featured.
   // Replace with a dedicated "popular" query once the backend supports it.

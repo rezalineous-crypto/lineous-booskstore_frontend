@@ -21,6 +21,28 @@ export const removeToken = (): void => {
   document.cookie = "accessToken=; path=/; max-age=0";
 };
 
+// Refresh token management
+export const getRefreshToken = (): string | null => {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("refreshToken");
+};
+
+export const setRefreshToken = (token: string): void => {
+  if (typeof window === "undefined") return;
+  localStorage.setItem("refreshToken", token);
+};
+
+export const removeRefreshToken = (): void => {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem("refreshToken");
+};
+
+// Clear all auth tokens
+export const clearAuthTokens = (): void => {
+  removeToken();
+  removeRefreshToken();
+};
+
 // API Error class
 export class ApiError extends Error {
   statusCode: number;
@@ -79,9 +101,49 @@ async function request<T>(
   }
   clearTimeout(timeoutId);
 
-  // Session expired: drop the dead token (and cached user)
-  if (response.status === 401 && typeof window !== "undefined") {
-    removeToken();
+  // Session expired: try to refresh the token first
+  if (response.status === 401 && typeof window !== "undefined" && !endpoint.startsWith("/auth/refresh")) {
+    const refreshToken = getRefreshToken();
+    if (refreshToken) {
+      try {
+        const refreshResponse = await fetch(`${BASE_URL}/auth/refresh`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        });
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          const newAccessToken = refreshData?.data?.accessToken || refreshData?.accessToken;
+          const newRefreshToken = refreshData?.data?.refreshToken || refreshData?.refreshToken;
+          if (newAccessToken) {
+            setToken(newAccessToken);
+            if (newRefreshToken) setRefreshToken(newRefreshToken);
+            // Retry the original request with the new token
+            const retryHeaders = { ...headers, Authorization: `Bearer ${newAccessToken}` };
+            const retryResponse = await fetch(`${BASE_URL}${endpoint}`, {
+              ...options,
+              headers: retryHeaders,
+              signal: options.signal ?? controller.signal,
+            });
+            clearTimeout(timeoutId);
+            const retryRaw = await retryResponse.text();
+            let retryData: unknown = null;
+            if (retryRaw) {
+              try { retryData = JSON.parse(retryRaw); } catch { /* ignore */ }
+            }
+            if (!retryResponse.ok) {
+              const payload = (retryData ?? {}) as { message?: string; errors?: Array<{ field: string; message: string }> };
+              throw new ApiError(payload.message || "Something went wrong. Please try again.", retryResponse.status, payload.errors);
+            }
+            return retryData as ApiResponse<T>;
+          }
+        }
+      } catch {
+        // Refresh failed — fall through to logout
+      }
+    }
+    // Refresh failed or no refresh token: drop tokens and redirect
+    clearAuthTokens();
     localStorage.removeItem("user");
     if (!window.location.pathname.startsWith("/login")) {
       const callbackUrl = window.location.pathname;

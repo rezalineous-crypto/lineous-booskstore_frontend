@@ -80,7 +80,7 @@ const BookDetailsPage = () => {
   const selectedPaper = book?.papers?.find((p) => p.id === selectedPaperId);
 
   // Max quantity based on stock
-  const maxQuantity = selectedPaper?.stock != null ? selectedPaper.stock : 99;
+  // const maxQuantity = selectedPaper?.stock != null ? selectedPaper.stock : 99;
 
   // Price display logic
   const getDisplayPrice = () => {
@@ -417,18 +417,18 @@ const BookDetailsPage = () => {
                     {quantity}
                   </span>
                   <button
-                    onClick={() => setQuantity((q) => Math.min(q + 1, maxQuantity))}
-                    disabled={quantity >= maxQuantity}
+                    onClick={() => setQuantity((q) => Math.min(q + 1))}
+                    // disabled={quantity}
                     className="p-3 hover:bg-slate-50 transition-colors active:scale-95 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-                {maxQuantity > 0 && quantity >= maxQuantity * 0.8 && (
+                {/* {maxQuantity > 0 && quantity >= maxQuantity * 0.8 && (
                   <p className="text-xs text-orange-600 mt-1">
                     Only {maxQuantity - quantity} left in stock
                   </p>
-                )}
+                )} */}
 
                 <Button
                   size="lg"

@@ -8,7 +8,8 @@ import { useBooks } from "@/hooks/use-books";
 import Link from "next/link";
 
 export default function Featured() {
-  const { data: books = [], isLoading } = useBooks();
+  const { data, isLoading } = useBooks();
+  const books = data?.books ?? [];
   
   // Interim differentiation: the API returns one list, so each home section
   // shows a different slice. Replace with a dedicated "featured" query

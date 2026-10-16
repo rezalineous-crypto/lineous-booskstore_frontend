@@ -7,10 +7,11 @@ import Link from "next/link";
 import { PackageCheck } from "lucide-react";
 
 export default function NewReleases() {
-  const { data: books = [], isLoading } = useBooks();
+  const { data, isLoading } = useBooks();
+  const books = data?.books || [];
   
   // Newest arrivals: the API list is treated as newest-first.
-  const newBooks = books.slice(0, 4);
+  const newBooks = books?.slice(0, 4);
 
   if (isLoading) {
     return (

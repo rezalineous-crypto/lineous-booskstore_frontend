@@ -335,6 +335,7 @@ export interface AuthUser {
 // Auth Response
 export interface AuthResponse {
   accessToken: string;
+  refreshToken?: string;
   user: AuthUser;
 }
 
