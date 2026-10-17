@@ -43,6 +43,52 @@ export const clearAuthTokens = (): void => {
   removeRefreshToken();
 };
 
+// Refresh token lock — prevents multiple concurrent refresh requests
+// (thundering herd problem when multiple API calls fail with 401 simultaneously)
+let refreshPromise: Promise<string | null> | null = null;
+
+/**
+ * Performs a token refresh with deduplication. If a refresh is already in
+ * progress, returns the existing promise so all callers share the same result.
+ */
+async function refreshAccessToken(): Promise<string | null> {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const refreshToken = getRefreshToken();
+      if (!refreshToken) {
+        return null;
+      }
+
+      const refreshResponse = await fetch(`${BASE_URL}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (refreshResponse.ok) {
+        const refreshData = await refreshResponse.json();
+        const newAccessToken = refreshData?.data?.accessToken || refreshData?.accessToken;
+        const newRefreshToken = refreshData?.data?.refreshToken || refreshData?.refreshToken;
+
+        if (newAccessToken) {
+          setToken(newAccessToken);
+          if (newRefreshToken) setRefreshToken(newRefreshToken);
+          return newAccessToken;
+        }
+      }
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 // API Error class
 export class ApiError extends Error {
   statusCode: number;
@@ -101,47 +147,31 @@ async function request<T>(
   }
   clearTimeout(timeoutId);
 
-  // Session expired: try to refresh the token first
+  // Session expired: try to refresh the token first (deduplicated via lock)
   if (response.status === 401 && typeof window !== "undefined" && !endpoint.startsWith("/auth/refresh")) {
-    const refreshToken = getRefreshToken();
-    if (refreshToken) {
-      try {
-        const refreshResponse = await fetch(`${BASE_URL}/auth/refresh`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refreshToken }),
-        });
-        if (refreshResponse.ok) {
-          const refreshData = await refreshResponse.json();
-          const newAccessToken = refreshData?.data?.accessToken || refreshData?.accessToken;
-          const newRefreshToken = refreshData?.data?.refreshToken || refreshData?.refreshToken;
-          if (newAccessToken) {
-            setToken(newAccessToken);
-            if (newRefreshToken) setRefreshToken(newRefreshToken);
-            // Retry the original request with the new token
-            const retryHeaders = { ...headers, Authorization: `Bearer ${newAccessToken}` };
-            const retryResponse = await fetch(`${BASE_URL}${endpoint}`, {
-              ...options,
-              headers: retryHeaders,
-              signal: options.signal ?? controller.signal,
-            });
-            clearTimeout(timeoutId);
-            const retryRaw = await retryResponse.text();
-            let retryData: unknown = null;
-            if (retryRaw) {
-              try { retryData = JSON.parse(retryRaw); } catch { /* ignore */ }
-            }
-            if (!retryResponse.ok) {
-              const payload = (retryData ?? {}) as { message?: string; errors?: Array<{ field: string; message: string }> };
-              throw new ApiError(payload.message || "Something went wrong. Please try again.", retryResponse.status, payload.errors);
-            }
-            return retryData as ApiResponse<T>;
-          }
-        }
-      } catch {
-        // Refresh failed — fall through to logout
+    const newAccessToken = await refreshAccessToken();
+
+    if (newAccessToken) {
+      // Retry the original request with the new token
+      const retryHeaders = { ...headers, Authorization: `Bearer ${newAccessToken}` };
+      const retryResponse = await fetch(`${BASE_URL}${endpoint}`, {
+        ...options,
+        headers: retryHeaders,
+        signal: options.signal ?? controller.signal,
+      });
+      clearTimeout(timeoutId);
+      const retryRaw = await retryResponse.text();
+      let retryData: unknown = null;
+      if (retryRaw) {
+        try { retryData = JSON.parse(retryRaw); } catch { /* ignore */ }
       }
+      if (!retryResponse.ok) {
+        const payload = (retryData ?? {}) as { message?: string; errors?: Array<{ field: string; message: string }> };
+        throw new ApiError(payload.message || "Something went wrong. Please try again.", retryResponse.status, payload.errors);
+      }
+      return retryData as ApiResponse<T>;
     }
+
     // Refresh failed or no refresh token: drop tokens and redirect
     clearAuthTokens();
     localStorage.removeItem("user");

@@ -206,7 +206,8 @@ const OrdersPage = () => {
   const [filters, setFilters] = useState<OrderFilterState>(
     DEFAULT_ORDER_FILTERS
   );
-  const { data: orders = [], isLoading } = useOrders(user?.id, filters.categoryId);
+  const { data, isLoading } = useOrders(user?.id, filters.categoryId);
+  const orders = data?.orders ?? [];
   const { downloadReceipt, isDownloading } = useOrderContext();
 
   // Guests can't have orders — send them to login

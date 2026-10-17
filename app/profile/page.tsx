@@ -39,12 +39,14 @@ import { Address } from "@/lib/types";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
 import LogoutLoader from "@/components/LogoutLoader";
+import ProfileSkeleton from "@/components/ProfileSkeleton";
 
 const ProfilePage = () => {
   const { user, updateProfile, logout, isAuthenticated } = useAuth();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -71,8 +73,18 @@ const ProfilePage = () => {
     }
   }, [isAuthenticated, isLoggingOut, router]);
 
+  // Simulate loading state for skeleton display
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
   if (!isAuthenticated && !isLoggingOut) {
     return null;
+  }
+
+  if (isLoading) {
+    return <ProfileSkeleton />;
   }
 
   const handleSave = async () => {
@@ -86,10 +98,10 @@ const ProfilePage = () => {
       });
       const updatedUser = response.data as { firstName?: string; lastName?: string; email?: string; phone?: string; bio?: string };
       updateProfile({
-        name: `${updatedUser.firstName || ""} ${updatedUser.lastName || ""}`.trim() || formData.name,
-        email: updatedUser.email || formData.email,
-        phone: updatedUser.phone || formData.phone,
-        bio: updatedUser.bio || formData.bio,
+        name: `${updatedUser?.firstName || ""} ${updatedUser?.lastName || ""}`.trim() || formData.name,
+        email: updatedUser?.email || formData?.email,
+        phone: updatedUser?.phone || formData?.phone,
+        bio: updatedUser?.bio || formData?.bio,
       });
       setIsEditing(false);
       toast.success("Profile saved", {
@@ -132,7 +144,7 @@ const ProfilePage = () => {
 
   const menuItems = [
     { icon: Package, label: "My Orders", href: "/orders" },
-    { icon: Heart, label: "Wishlist", href: "#wishlist" },
+    // { icon: Heart, label: "Wishlist", href: "#wishlist" },
     { icon: Settings, label: "Settings", href: "#settings" },
   ];
 
@@ -187,16 +199,16 @@ const ProfilePage = () => {
                         onClick={handleSave}
                         className="active:scale-95 transition-transform bg-orange-500 hover:bg-orange-600 text-white border border-primary/20 shadow-lg shadow-primary/20"
                       >
-                        <Save className="w-4 h-4 mr-2" />
+                        <Save className="w-4 h-4" />
                         Save Changes
                       </Button>
                     ) : (
                       <Button
                         variant="outline"
                         onClick={() => setIsEditing(true)}
-                        className="active:scale-95 transition-transform bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
+                        className="active:scale-95 bg-orange-50 border-orange-200 text-slate-700 hover:bg-orange-500 hover:border-orange-300 transition-all duration-300 ease-in-out hover:text-white"
                       >
-                        <Edit2 className="w-4 h-4 mr-2" />
+                        <Edit2 className="w-4 h-4 " />
                         Edit Profile
                       </Button>
                     )}
@@ -456,7 +468,7 @@ const ProfilePage = () => {
                 </div>
 
                 {/* Social Accounts */}
-                <div className="bg-white rounded-2xl p-6 lg:p-8 border border-slate-200 shadow-sm">
+                {/* <div className="bg-white rounded-2xl p-6 lg:p-8 border border-slate-200 shadow-sm">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="font-display text-xl font-semibold text-slate-900">
                       Social Accounts
@@ -508,7 +520,7 @@ const ProfilePage = () => {
                       );
                     })}
                   </div>
-                </div>
+                </div> */}
               </motion.div>
             </div>
           </motion.div>

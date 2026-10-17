@@ -124,12 +124,15 @@ export const useTreeListing = (
 
   // Books are fetched per top-level category, then narrowed to this node's
   // book IDs (the menu tree carries IDs only — no prices/thumbnails).
-  const { data: booksData = [], isLoading: areBooksLoading } = useBooks(
+  const { data, isLoading: areBooksLoading } = useBooks(
     undefined,
     listing?.categoryId,
     undefined,
+    1,
+    20,
     !!listing,
   );
+  const booksData = data?.books ?? [];
 
   const books = useMemo<Book[]>(() => {
     if (!listing || listing.bookIds.length === 0) return [];

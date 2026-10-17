@@ -568,7 +568,12 @@ const Navbar = () => {
   const { isAuthenticated, mounted } = useAuth();
   const navigate = useRouter();
   const pathname = usePathname();
-  const { data: menuTree = [], isLoading: queryLoading, error, refetch: refetchMenuTree } = useCategoriesMenuTree();
+  const {
+    data: menuTree = [],
+    isLoading: queryLoading,
+    error,
+    refetch: refetchMenuTree,
+  } = useCategoriesMenuTree();
   // Ensure consistent loading state between server and client to avoid hydration mismatch
   const isLoading = !mounted || queryLoading;
 
@@ -585,7 +590,7 @@ const Navbar = () => {
    * Transform menu tree data (Category → Publication → Subject → Book) into navbar menu structure
    * Dropdown hierarchy (3 levels):
    *   Level 1 (left column): Publications under the category
-   *   Level 2 (middle column): Subjects under selected publication  
+   *   Level 2 (middle column): Subjects under selected publication
    *   Level 3 (right column): Books under selected subject (routes to /book/:id)
    */
   const transformCategoryToMenuItem = (
@@ -606,12 +611,13 @@ const Navbar = () => {
               categoryHref && pub.slug
                 ? `${categoryHref}/${pub.slug}/${subj.slug}`
                 : undefined;
-                    // Build books as children (level 3) - use book ID for routing (app/book/[id])
-            const subjChildren = subj.books?.map((book: MenuTreeBook) => ({
-              name: book.title,
-              href: `/book/${book.id}`,
-              children: [],
-            })) || [];
+            // Build books as children (level 3) - use book ID for routing (app/book/[id])
+            const subjChildren =
+              subj.books?.map((book: MenuTreeBook) => ({
+                name: book.title,
+                href: `/book/${book.id}`,
+                children: [],
+              })) || [];
             return {
               name: subj.name,
               href: subjHref,
@@ -670,7 +676,14 @@ const Navbar = () => {
   const navLinks = [
     { name: "Home", children: [], href: "/" },
     ...(error
-      ? [{ name: "Menu", children: [], error: error?.message || null, onRetry: refetchMenuTree }]
+      ? [
+          {
+            name: "Menu",
+            children: [],
+            error: error?.message || null,
+            onRetry: refetchMenuTree,
+          },
+        ]
       : isLoading
       ? Array.from({ length: Math.max(currentSkeletonCount, 3) }).map(
           (_, i) => ({
@@ -754,20 +767,20 @@ const Navbar = () => {
                   icon={<Search className="w-4.5 h-4.5" />}
                   onClick={() => setShowSearch(!showSearch)}
                 />
-                <IconButton
+                {/* <IconButton
                   icon={<Heart className="w-[18px] h-[18px]" />}
                   onClick={() => {}}
                   className="hidden sm:flex"
+                /> */}
+                <IconButton
+                  icon={<ShoppingCart className="w-[18px] h-[18px]" />}
+                  onClick={() => setIsCartOpen(true)}
+                  badge={totalItems}
                 />
                 <IconButton
                   icon={<User className="w-[18px] h-[18px]" />}
                   onClick={() => navigate.push("/profile")}
                   className="hidden sm:flex"
-                />
-                <IconButton
-                  icon={<ShoppingCart className="w-[18px] h-[18px]" />}
-                  onClick={() => setIsCartOpen(true)}
-                  badge={totalItems}
                 />
               </>
             ) : (
@@ -870,7 +883,7 @@ const IconButton = ({
   <button
     onClick={onClick}
     className={`
-      relative h-9 w-9 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-600 hover:text-primary transition-all duration-200
+      relative h-9 w-9 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-600 hover:text-primary transition-all duration-200 cursor-pointer
       ${className}
     `}
   >
