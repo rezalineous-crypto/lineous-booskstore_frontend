@@ -30,11 +30,12 @@ const BooksContent = () => {
   const { data: category } = useCategory(selectedCategoryId || "");
   const { data: bookTree = [] } = useBookTree(selectedCategoryId || undefined);
   const { data: subjects = [] } = useSubjects();
-  const { data: booksData = [], isLoading, error } = useBooks(
+  const { data, isLoading, error } = useBooks(
     selectedSubjectId || undefined,
     selectedCategoryId || undefined,
     searchQuery || undefined
   );
+  const booksData = data?.books ?? [];
 
   // Client-side filtering for search results by category if needed (as per requirements)
   const books = useMemo(() => {
