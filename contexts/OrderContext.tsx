@@ -18,7 +18,8 @@ const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
 export const OrderProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
-  const { data: orders = [], isLoading } = useOrders(user?.id);
+  const { data, isLoading } = useOrders(user?.id);
+  const orders = data?.orders ?? [];
   const { mutate: createOrderMutate, isPending: isCreating } = useCreateOrder();
   const { mutate: downloadReceiptMutate, isPending: isDownloading } = useDownloadReceipt();
 
