@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Eye,
@@ -37,6 +37,17 @@ const LoginPage = () => {
 
   const { login, register } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // URL the user was on before being sent to login (e.g. a book details page)
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+
+  // Only allow relative paths to prevent open-redirect attacks
+  const isSafeUrl = (url: string) => url.startsWith("/") && !url.startsWith("//");
+
+  const redirectAfterAuth = () => {
+    router.push(isSafeUrl(callbackUrl) ? callbackUrl : "/");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +57,7 @@ const LoginPage = () => {
       if (isLogin) {
         await login(formData.email, formData.password);
         toast.success("Welcome back!");
-        router.push("/");
+        redirectAfterAuth();
       } else {
         if (formData.password !== formData.confirmPassword) {
           toast.warning("Passwords don't match", {
@@ -60,7 +71,7 @@ const LoginPage = () => {
         toast.success("Account created!", {
           description: "Welcome to Core Learning Centre.",
         });
-        router.push("/");
+        redirectAfterAuth();
       }
     } catch (error) {
       toast.error(
@@ -195,7 +206,7 @@ const LoginPage = () => {
             transition={{ delay: 0.5 }}
             className="space-y-3 mb-8"
           >
-            <GoogleButton onSuccess={() => router.push("/")} />
+            <GoogleButton onSuccess={redirectAfterAuth} />
           {/**  <FacebookButton onSuccess={() => router.push("/")} />
             <AppleButton onSuccess={() => router.push("/")} /> */}
           </motion.div>

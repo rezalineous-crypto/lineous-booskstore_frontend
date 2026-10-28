@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useRouter, usePathname } from "next/navigation";
 import { apiClient, ApiError } from "@/lib/api-client";
 import { Cart, CartItem } from "@/lib/types";
 
@@ -21,6 +22,8 @@ export const useCart = (userId?: string) => {
 // Add to cart
 export const useAddToCart = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const pathname = usePathname();
 
   return useMutation<Cart, Error, { bookId: string; paperId?: string; categoryId?: string; quantity: number }>({
     mutationFn: async (data) => {
@@ -34,6 +37,7 @@ export const useAddToCart = () => {
     onError: (error) => {
       if (error instanceof ApiError && error.statusCode === 401) {
         toast.error("Please sign in to add items to your cart");
+        router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
         return;
       }
       if (error instanceof ApiError) {
@@ -46,6 +50,8 @@ export const useAddToCart = () => {
 // Update cart item
 export const useUpdateCartItem = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const pathname = usePathname();
 
   return useMutation<CartItem, Error, { cartItemId: string; quantity: number }>({
     mutationFn: async ({ cartItemId, quantity }) => {
@@ -58,6 +64,7 @@ export const useUpdateCartItem = () => {
     onError: (error) => {
       if (error instanceof ApiError && error.statusCode === 401) {
         toast.error("Please sign in to update your cart");
+        router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
         return;
       }
       if (error instanceof ApiError) {
@@ -70,6 +77,8 @@ export const useUpdateCartItem = () => {
 // Remove from cart
 export const useRemoveFromCart = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const pathname = usePathname();
 
   return useMutation<void, Error, string>({
     mutationFn: async (cartItemId) => {
@@ -82,6 +91,7 @@ export const useRemoveFromCart = () => {
     onError: (error) => {
       if (error instanceof ApiError && error.statusCode === 401) {
         toast.error("Please sign in to update your cart");
+        router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
         return;
       }
       if (error instanceof ApiError) {
@@ -94,6 +104,8 @@ export const useRemoveFromCart = () => {
 // Clear cart
 export const useClearCart = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const pathname = usePathname();
 
   return useMutation<void, Error, void>({
     mutationFn: async () => {
@@ -106,6 +118,7 @@ export const useClearCart = () => {
     onError: (error) => {
       if (error instanceof ApiError && error.statusCode === 401) {
         toast.error("Please sign in to update your cart");
+        router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
         return;
       }
       if (error instanceof ApiError) {

@@ -78,9 +78,9 @@ export default function HeroBanner() {
 
       {/* ── Content ── */}
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[80vh]">
+        <div className="grid lg:grid-cols-[60%_40%] gap-12 lg:gap-16 items-center min-h-[80vh]">
           {/* ── Left Column: Text ── */}
-          <motion.div style={{ opacity }} className="max-w-xl">
+          <motion.div style={{ opacity }} className="">
             {/* Badge */}
             {/* <motion.div
               initial={{ opacity: 0, x: -30, scale: 0.9 }}
@@ -103,12 +103,12 @@ export default function HeroBanner() {
                 duration: 0.8,
                 ease: [0.25, 0.46, 0.45, 0.94] as const,
               }}
-              className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] mb-6"
+              className="text-4xl md:text-5xl font-bold text-white leading-[1.15] mb-6 max-w-xl"
             >
-              Discover Your Next{" "}
+              A journey to achieve the{" "}
               <span className="relative inline-block">
                 <span className="relative z-10 text-orange-500 italic font-serif">
-                  Literary
+                  Milestone
                 </span>
                 <motion.svg
                   className="absolute -bottom-2 left-0 w-full"
@@ -129,7 +129,7 @@ export default function HeroBanner() {
                   />
                 </motion.svg>
               </span>{" "}
-              Adventure
+              without agonizing pain
             </motion.h1>
 
             {/* Subtitle */}
@@ -137,10 +137,16 @@ export default function HeroBanner() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.7 }}
-              className="text-lg md:text-xl text-gray-300 leading-relaxed mb-10 max-w-lg"
+              className="text-base text-gray-300 leading-relaxed mb-10 max-w-2xl"
             >
-              Explore our curated collection of bestsellers, hidden gems, and
-              timeless classics. Every book tells a story worth experiencing.
+              CLC Resource is an ultimate HUB for Paper based Workbooks featuring
+              real exam-style layouts with dedicated space to write the answers
+              covering the genre of Topical Past Papers, Year-wise Past Papers
+              and Predicted Mock Papers for Cambridge, Edexcel and IB
+              (International Baccalaureate) curricula designed to streamline the
+              learning and boost the exam confidence. Explore the meticulously
+              organized comprehensive collection to bridge the gap between
+              studying and scoring.
             </motion.p>
 
             {/* Search Bar */}
@@ -185,7 +191,13 @@ export default function HeroBanner() {
             >
               <Button
                 size="lg"
-                className="h-14 px-8 rounded-2xl bg-charcoal hover:bg-charcoal/80 text-white text-base font-semibold shadow-xl shadow-charcoal/20 hover:shadow-2xl transition-all duration-300 group"
+                className="h-14 px-8 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white text-base font-semibold shadow-xl shadow-charcoal/20 hover:shadow-2xl transition-all duration-300 group"
+                onClick={() => {
+                  const el = document.getElementById("new-releases");
+                  if (el) {
+                    el.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
               >
                 Browse Collection
                 <motion.span

@@ -787,7 +787,9 @@ const Navbar = () => {
               <Button
                 size="sm"
                 className="h-9 px-5 text-[13px] font-medium rounded-full bg-primary hover:bg-primary-hover text-white shadow-sm shadow-primary/20 transition-colors"
-                onClick={() => navigate.push("/login")}
+                onClick={() =>
+                  navigate.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`)
+                }
               >
                 Sign In
               </Button>
@@ -848,7 +850,9 @@ const Navbar = () => {
                   <>
                     <Button
                       className="flex-1 h-10 rounded-full text-[13px] font-medium bg-primary hover:bg-primary-hover text-white transition-colors"
-                      onClick={() => navigate.push("/login")}
+                      onClick={() =>
+                        navigate.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`)
+                      }
                     >
                       Sign In
                     </Button>
