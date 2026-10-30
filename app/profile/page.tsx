@@ -57,7 +57,7 @@ const ProfilePage = () => {
     bio: user?.bio || "",
   });
 
-  const { data: addresses = [], isLoading: addressesLoading } = useAddresses();
+  const { data: addresses = [], isLoading: addressesLoading } = useAddresses(user?.id);
   const createAddressMutation = useCreateAddress();
   const updateAddressMutation = useUpdateAddress();
   const deleteAddressMutation = useDeleteAddress();
@@ -79,11 +79,8 @@ const ProfilePage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  if (!isAuthenticated && !isLoggingOut) {
-    return null;
-  }
-
-  if (isLoading) {
+  // Show skeleton for any transitional state (loading, auth check, redirecting)
+  if (isLoading || (!isAuthenticated && !isLoggingOut) || isLoggingOut) {
     return <ProfileSkeleton />;
   }
 
@@ -145,7 +142,7 @@ const ProfilePage = () => {
   const menuItems = [
     { icon: Package, label: "My Orders", href: "/orders" },
     // { icon: Heart, label: "Wishlist", href: "#wishlist" },
-    { icon: Settings, label: "Settings", href: "#settings" },
+    // { icon: Settings, label: "Settings", href: "#settings" },
   ];
 
   return (

@@ -196,7 +196,7 @@ const MenuItem = ({
           ${
             hasChildren
               ? isOpen
-                ? "bg-primary/5 text-primary"
+                ? "bg-primary/15 text-primary"
                 : "text-slate-700 hover:text-primary hover:bg-slate-50"
               : "text-slate-700 hover:text-primary hover:bg-slate-50"
           }
@@ -737,7 +737,7 @@ const Navbar = () => {
             </div>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-1 relative">
+          <div className="hidden lg:flex items-center gap-1 relative border">
             {navLinks.map((link, idx) => (
               <MenuItem
                 key={idx}
