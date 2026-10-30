@@ -250,7 +250,7 @@ export default function HeroBanner() {
               }}
             >
               <img
-                src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=500&fit=crop"
+                src="/bannerImage/Biology.jpeg"
                 alt="Featured book"
                 className="w-full h-full object-cover"
               />
@@ -270,21 +270,21 @@ export default function HeroBanner() {
 
             {/* Floating smaller books */}
             <FloatingBook
-              src="https://images.unsplash.com/photo-1512820790803-83ca734da794?w=200&h=280&fit=crop"
+              src="/bannerImage/Chemistry.jpeg"
               className="w-36 h-48 top-8 right-8 z-10"
               delay={0.3}
               rotate={8}
               yOffset={-15}
             />
             <FloatingBook
-              src="https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=200&h=280&fit=crop"
+              src="/bannerImage/Amath.jpeg"
               className="w-32 h-44 bottom-16 left-0 z-10"
               delay={0.5}
               rotate={-6}
               yOffset={15}
             />
             <FloatingBook
-              src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=180&h=250&fit=crop"
+              src="/bannerImage/Gmath.jpeg"
               className="w-28 h-40 top-24 left-4 z-0 opacity-60"
               delay={0.7}
               rotate={-12}

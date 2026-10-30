@@ -45,6 +45,8 @@ interface MenuItemComponentProps {
   isTopLevel?: boolean;
   isLoading?: boolean;
   error?: string | null;
+  onActivate?: () => void;
+  isActive?: boolean;
 }
 
 const MenuItem = ({
@@ -55,6 +57,8 @@ const MenuItem = ({
   isTopLevel = false,
   isLoading,
   error,
+  onActivate,
+  isActive,
 }: MenuItemComponentProps) => {
   const [hovered, setHovered] = useState(false);
   const [subMenuHovered, setSubMenuHovered] = useState(false);
@@ -68,7 +72,7 @@ const MenuItem = ({
 
   const isOpen = isMobile
     ? mobileOpen && mobileOpen[item.name]
-    : hovered || subMenuHovered;
+    : hovered || subMenuHovered || !!isActive;
 
   const activeChild =
     activeChildIndex !== null && hasChildren
@@ -182,7 +186,12 @@ const MenuItem = ({
   return (
     <div
       className="relative"
-      onMouseEnter={() => setHovered(true)}
+      onMouseEnter={() => {
+        setHovered(true);
+        if (hasChildren && onActivate) {
+          onActivate();
+        }
+      }}
       onMouseLeave={() => {
         setHovered(false);
         setSubMenuHovered(false);
@@ -195,7 +204,7 @@ const MenuItem = ({
           flex justify-between items-center cursor-pointer py-2 px-3 rounded-lg transition-all duration-200
           ${
             hasChildren
-              ? isOpen
+              ? isOpen || isActive
                 ? "bg-primary/15 text-primary"
                 : "text-slate-700 hover:text-primary hover:bg-slate-50"
               : "text-slate-700 hover:text-primary hover:bg-slate-50"
@@ -208,6 +217,11 @@ const MenuItem = ({
           <Link
             href={item?.href || ""}
             className="text-[13px] font-medium tracking-wide"
+            onClick={(e) => {
+              if (hasChildren) {
+                e.preventDefault();
+              }
+            }}
           >
             {item.name}
           </Link>
@@ -215,228 +229,299 @@ const MenuItem = ({
         {hasChildren && (
           <ChevronDown
             className={`w-3.5 h-3.5 transition-transform duration-200 ${
-              isOpen ? "rotate-180" : ""
+              isOpen || isActive ? "rotate-180" : ""
             }`}
           />
         )}
       </div>
+      {/* Dropdown moved to shared MegaMenu */}
+    </div>
+  );
+};
 
-      {hasChildren && (
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
-              className="absolute top-full left-1/2 -translate-x-1/2 mt-2 rounded-xl shadow-xl border border-slate-200 bg-white/95 backdrop-blur-md z-50 p-6 min-w-160 min-h-75 overflow-hidden"
-              onMouseEnter={() => setSubMenuHovered(true)}
-              onMouseLeave={() => {
-                setSubMenuHovered(false);
-                setActiveChildIndex(null);
-                setActiveGrandchildIndex(null);
-              }}
-            >
-              <div className="flex">
-                {isLoading ? (
-                  <div className="flex items-center justify-center w-full p-8">
-                    <Loader2 className="w-6 h-6 animate-spin text-foreground/40" />
-                  </div>
-                ) : error ? (
-                  <div className="flex flex-col items-center justify-center w-full p-8">
-                    <p className="text-sm text-red-500 mb-2">{error}</p>
-                    {item.onRetry && (
-                      <Button
-                        size="sm"
-                        onClick={item.onRetry}
-                        className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1.5 rounded"
+const DesktopMegaMenu = ({
+  activeItem,
+  isLoading,
+  error,
+  onRetry,
+  onMouseEnter,
+  onMouseLeave,
+}: {
+  activeItem: MenuItemProps | null;
+  isLoading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+}) => {
+  const router = useRouter();
+  const [activeChildIndex, setActiveChildIndex] = useState<number | null>(null);
+  const [activeGrandchildIndex, setActiveGrandchildIndex] = useState<
+    number | null
+  >(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setActiveChildIndex(null);
+    setActiveGrandchildIndex(null);
+  }, [activeItem?.name]);
+
+  if (!activeItem) return null;
+
+  const hasChildren =
+    (activeItem.children && activeItem.children.length > 0) ||
+    isLoading ||
+    !!error;
+  if (!hasChildren) return null;
+
+  const activeChild =
+    activeChildIndex !== null && activeItem.children
+      ? (() => {
+          const child = activeItem.children[activeChildIndex];
+          return typeof child === "string" ? null : child;
+        })()
+      : null;
+
+  const activeGrandchild =
+    activeGrandchildIndex !== null &&
+    activeChild &&
+    activeChild.children &&
+    activeChild.children.length > 0
+      ? (() => {
+          const child = activeChild.children[activeGrandchildIndex];
+          return typeof child === "string" ? null : child;
+        })()
+      : null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="absolute left-0 right-0 top-full mt-2 w-full rounded-xl shadow-xl border bg-cyan-50 backdrop-blur-md z-50 overflow-hidden border-cyan-600"
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      >
+        <div className="grid grid-cols-3 divide-x divide-slate-200 min-h-[320px]">
+          {isLoading ? (
+            <div className="col-span-3 flex items-center justify-center p-12">
+              <Loader2 className="w-6 h-6 animate-spin text-foreground/40" />
+            </div>
+          ) : error ? (
+            <div className="col-span-3 flex flex-col items-center justify-center p-12">
+              <p className="text-sm text-red-500 mb-2">{error}</p>
+              {onRetry && (
+                <Button
+                  size="sm"
+                  onClick={onRetry}
+                  className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1.5 rounded"
+                >
+                  Retry
+                </Button>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-col group transition-all duration-300 ease-in">
+                <div className="px-6 pt-5 pb-3 border-b border-slate-100">
+                  <h3 className="text-xs font-semibold text-slate-400 group-hover:text-[16px] group-hover:font-bold uppercase tracking-wider group-hover:text-cyan-800/50 transition-all duration-300 ease-in">
+                    Publications
+                  </h3>
+                </div>
+                <div className="flex-1 overflow-y-auto max-h-[420px] py-2">
+                  {activeItem.children!.map(
+                    (child: MenuItemProps | string, idx: number) => {
+                      const childItem =
+                        typeof child === "string"
+                          ? { name: child, children: [] }
+                          : child;
+                      const childHasChildren =
+                        childItem.children && childItem.children.length > 0;
+                      const isActive = activeChildIndex === idx;
+
+                      return (
+                        <div
+                          key={idx}
+                          className={`
+                            flex items-center justify-between cursor-pointer mx-3 my-0.5 py-2.5 px-3 rounded-lg transition-all duration-150
+                            ${
+                              isActive
+                                ? "bg-primary/5 text-primary"
+                                : "text-slate-700 hover:text-primary hover:bg-slate-50"
+                            }
+                          `}
+                          onMouseEnter={() => {
+                            setActiveChildIndex(idx);
+                            setActiveGrandchildIndex(null);
+                          }}
+                        >
+                          <span className="text-[13px] font-medium tracking-wide">
+                            {childItem.name}
+                          </span>
+                          {childHasChildren && (
+                            <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                          )}
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col group transition-all duration-300 ease-in">
+                <div className="px-6 pt-5 pb-3 border-b border-slate-100">
+                  <h3 className="text-xs font-semibold text-slate-400 group-hover:text-[16px] group-hover:font-bold uppercase tracking-wider group-hover:text-cyan-800/50 transition-all duration-300 ease-in">
+                    Subjects
+                  </h3>
+                </div>
+                <div className="flex-1 overflow-y-auto max-h-[420px] py-2 relative">
+                  <AnimatePresence mode="wait">
+                    {activeChild &&
+                    activeChild.children &&
+                    activeChild.children.length > 0 ? (
+                      <motion.div
+                        key={activeChild.name}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute inset-x-0 top-0"
                       >
-                        Retry
-                      </Button>
-                    )}
-                  </div>
-                ) : (
-                  <>
-                    {/* Level 1: Publications */}
-                    <div className="flex flex-col min-w-40">
-                      {item.children!.map(
-                        (child: MenuItemProps | string, idx: number) => {
-                          const childItem =
-                            typeof child === "string"
-                              ? { name: child, children: [] }
-                              : child;
-                          const childHasChildren =
-                            childItem.children && childItem.children.length > 0;
-                          const isActive = activeChildIndex === idx;
+                        {activeChild.children!.map(
+                          (child: MenuItemProps | string, idx: number) => {
+                            const childItem =
+                              typeof child === "string"
+                                ? { name: child, children: [] }
+                                : child;
+                            const childHasChildren =
+                              childItem.children &&
+                              childItem.children.length > 0;
+                            const isActive = activeGrandchildIndex === idx;
 
-                          return (
-                            <div
-                              key={idx}
-                              className={`
-                                  flex items-center justify-between cursor-pointer py-2.5 px-3 rounded-lg transition-colors duration-150
+                            return (
+                              <div
+                                key={idx}
+                                className={`
+                                  flex items-center justify-between cursor-pointer mx-3 my-0.5 py-2.5 px-3 rounded-lg transition-all duration-150
                                   ${
                                     isActive
                                       ? "bg-primary/5 text-primary"
                                       : "text-slate-700 hover:text-primary hover:bg-slate-50"
                                   }
                                 `}
-                              onMouseEnter={() => {
-                                setActiveChildIndex(idx);
-                                setActiveGrandchildIndex(null);
-                              }}
-                            >
-                              <span className="text-[13px] font-medium tracking-wide">
-                                {childItem.name}
-                              </span>
-                              {childHasChildren && (
-                                <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
-                              )}
-                            </div>
-                          );
-                        }
-                      )}
-                    </div>
-
-                    {/* Level 2: Subjects */}
-                    <div className="relative w-50 border-l border-slate-200">
-                      <AnimatePresence initial={false}>
-                        {activeChild &&
-                        activeChild.children &&
-                        activeChild.children.length > 0 ? (
-                          <motion.div
-                            key={activeChild.name + "-children"}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.1 }}
-                            className="pl-3 pr-1 py-1 rounded-lg"
-                          >
-                            <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 px-3 pt-1">
-                              {/* {activeChild.name} */}
-                            </h3>
-                            <div className="space-y-0.5 max-h-75 overflow-y-auto">
-                              {activeChild.children!.map(
-                                (
-                                  child: MenuItemProps | string,
-                                  idx: number
-                                ) => {
-                                  const childItem =
-                                    typeof child === "string"
-                                      ? { name: child, children: [] }
-                                      : child;
-                                  const childHasChildren =
-                                    childItem.children &&
-                                    childItem.children.length > 0;
-                                  const isActive =
-                                    activeGrandchildIndex === idx;
-
-                                  return (
-                                    <div
-                                      key={idx}
-                                      className="flex items-center justify-between cursor-pointer py-2 px-3 rounded-lg transition-colors duration-150"
-                                      onMouseEnter={() => {
-                                        setActiveGrandchildIndex(idx);
-                                      }}
-                                      onClick={() => {
-                                        if (childItem.href) {
-                                          router.push(childItem.href);
-                                        }
-                                      }}
-                                    >
-                                      <span
-                                        className={`text-[13px] font-medium ${
-                                          isActive
-                                            ? "bg-primary/5 text-primary"
-                                            : "text-slate-700 hover:text-primary hover:bg-slate-50"
-                                        } rounded-md px-2 py-0.5`}
-                                      >
-                                        {childItem.name}
-                                      </span>
-                                      {childHasChildren && (
-                                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
-                                      )}
-                                    </div>
-                                  );
-                                }
-                              )}
-                            </div>
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            key="empty"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-0 flex items-center justify-center"
-                          >
-                            <span className="text-xs text-slate-300">
-                              Select a category
-                            </span>
-                          </motion.div>
+                                onMouseEnter={() => {
+                                  setActiveGrandchildIndex(idx);
+                                }}
+                                onClick={() => {
+                                  if (childItem.href) {
+                                    router.push(childItem.href);
+                                    setActiveChildIndex(null);
+                                    setActiveGrandchildIndex(null);
+                                  }
+                                }}
+                              >
+                                <span className="text-[13px] font-medium">
+                                  {childItem.name}
+                                </span>
+                                {childHasChildren && (
+                                  <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                )}
+                              </div>
+                            );
+                          }
                         )}
-                      </AnimatePresence>
-                    </div>
-
-                    {/* Level 3: Books */}
-                    <div className="relative w-60 border-l border-slate-200">
-                      <AnimatePresence initial={false}>
-                        {activeGrandchild &&
-                        activeGrandchild.children &&
-                        activeGrandchild.children.length > 0 ? (
-                          <motion.div
-                            key={
-                              activeChild?.name + "-" + activeGrandchild.name
-                            }
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            transition={{ duration: 0.12 }}
-                            className="pl-3 pr-1 py-1 rounded-r-lg"
-                          >
-                            <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 px-3 pt-1">
-                              {/* {activeGrandchild.name} */}
-                            </h3>
-                            <div className="space-y-0.5 max-h-75 overflow-y-auto">
-                              {activeGrandchild.children!.map(
-                                (
-                                  child: MenuItemProps | string,
-                                  idx: number
-                                ) => {
-                                  const childItem =
-                                    typeof child === "string"
-                                      ? { name: child, children: [] }
-                                      : child;
-
-                                  return (
-                                    <div
-                                      key={idx}
-                                      className="cursor-pointer py-2 px-3 rounded-lg text-slate-700 hover:text-primary hover:bg-slate-50 transition-colors duration-150"
-                                      onClick={() => {
-                                        if (childItem.href) {
-                                          router.push(childItem.href);
-                                        }
-                                      }}
-                                    >
-                                      <span className="text-[13px] font-medium">
-                                        {childItem.name}
-                                      </span>
-                                    </div>
-                                  );
-                                }
-                              )}
-                            </div>
-                          </motion.div>
-                        ) : null}
-                      </AnimatePresence>
-                    </div>
-                  </>
-                )}
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="empty-pub"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 flex items-start justify-center pt-6"
+                      >
+                        <span className="text-xs text-slate-400">
+                          {activeItem.children && activeItem.children.length > 0
+                            ? "Select a publication"
+                            : "No publications"}
+                        </span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
-            </motion.div>
+
+              <div className="flex flex-col group transition-all duration-300 ease-in">
+                <div className="px-6 pt-5 pb-3 border-b border-slate-100">
+                  <h3 className="text-xs font-semibold text-slate-400 group-hover:text-[16px] group-hover:font-bold uppercase tracking-wider group-hover:text-cyan-800/50 transition-all duration-300 ease-in">
+                    Books
+                  </h3>
+                </div>
+                <div className="flex-1 overflow-y-auto max-h-[420px] py-2 relative">
+                  <AnimatePresence mode="wait">
+                    {activeGrandchild &&
+                    activeGrandchild.children &&
+                    activeGrandchild.children.length > 0 ? (
+                      <motion.div
+                        key={activeChild?.name + "-" + activeGrandchild.name}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute inset-x-0 top-0"
+                      >
+                        {activeGrandchild.children!.map(
+                          (child: MenuItemProps | string, idx: number) => {
+                            const childItem =
+                              typeof child === "string"
+                                ? { name: child, children: [] }
+                                : child;
+
+                            return (
+                              <div
+                                key={idx}
+                                className="cursor-pointer mx-3 my-0.5 py-2.5 px-3 rounded-lg text-slate-700 hover:text-primary hover:bg-slate-50 transition-all duration-150"
+                                onClick={() => {
+                                  if (childItem.href) {
+                                    router.push(childItem.href);
+                                    setActiveChildIndex(null);
+                                    setActiveGrandchildIndex(null);
+                                  }
+                                }}
+                              >
+                                <span className="text-[13px] font-medium">
+                                  {childItem.name}
+                                </span>
+                              </div>
+                            );
+                          }
+                        )}
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="empty-subj"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 flex items-start justify-center pt-6"
+                      >
+                        <span className="text-xs text-slate-400">
+                          {activeChild?.children &&
+                          activeChild.children.length > 0
+                            ? "Select a subject"
+                            : "No subjects"}
+                        </span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </>
           )}
-        </AnimatePresence>
-      )}
-    </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
@@ -554,6 +639,7 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [activeMenuIndex, setActiveMenuIndex] = useState<number | null>(null);
   const [skeletonCount, setSkeletonCount] = useState(() => {
     if (typeof window !== "undefined") {
       const cached = localStorage.getItem("menuTreeVisibleCount");
@@ -717,7 +803,7 @@ const Navbar = () => {
             <div className="relative">
               <img
                 src="/logo.png"
-                className="w-9 h-9 object-contain hidden md:block transition-transform duration-300 group-hover:scale-105"
+                className="w-14 h-14 object-contain hidden md:block transition-transform duration-300 group-hover:scale-105"
               />
               <img
                 src="/logowtext.png"
@@ -725,27 +811,69 @@ const Navbar = () => {
               />
             </div>
             <div className="hidden md:block">
-              <span className="font-display text-xl font-semibold tracking-tight text-foreground">
-                Core
-              </span>
-              <span className="font-display text-xl font-semibold tracking-tight text-primary ml-1">
-                Learning
-              </span>
-              <span className="font-display text-xl font-semibold tracking-tight text-foreground ml-1">
-                Center
-              </span>
+              <div>
+                <span className="font-display text-xl font-semibold tracking-tight text-foreground">
+                  Core
+                </span>
+                <span className="font-display text-xl font-semibold tracking-tight text-primary ml-1">
+                  Learning
+                </span>
+                <span className="font-display text-xl font-semibold tracking-tight text-foreground ml-1">
+                  Center
+                </span>
+              </div>
+              {/* Tagline */}
+              <p className="text-xs font-display font-medium text-gray-500 tracking-widest">Learn with Excellence</p>
             </div>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-1 relative border">
+          <div
+            className="hidden lg:flex items-center gap-1 relative"
+            onMouseLeave={() => setActiveMenuIndex(null)}
+          >
             {navLinks.map((link, idx) => (
               <MenuItem
                 key={idx}
                 item={link}
                 isMobile={false}
-                isTopLevel={link.children && link.children.length > 0}
+                isTopLevel={!!(link.children && link.children.length > 0)}
+                onActivate={() => {
+                  if (link.children && link.children.length > 0) {
+                    setActiveMenuIndex(idx);
+                  } else {
+                    setActiveMenuIndex(null);
+                  }
+                }}
+                isActive={activeMenuIndex === idx}
               />
             ))}
+            <DesktopMegaMenu
+              key={
+                activeMenuIndex !== null
+                  ? `${activeMenuIndex}-${navLinks[activeMenuIndex]?.name}`
+                  : "mega-none"
+              }
+              activeItem={
+                activeMenuIndex !== null ? navLinks[activeMenuIndex] : null
+              }
+              isLoading={
+                activeMenuIndex !== null
+                  ? navLinks[activeMenuIndex]?.isLoading
+                  : false
+              }
+              error={
+                activeMenuIndex !== null
+                  ? navLinks[activeMenuIndex]?.error
+                  : null
+              }
+              onRetry={
+                activeMenuIndex !== null
+                  ? navLinks[activeMenuIndex]?.onRetry
+                  : undefined
+              }
+              onMouseEnter={() => {}}
+              onMouseLeave={() => setActiveMenuIndex(null)}
+            />
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -788,7 +916,9 @@ const Navbar = () => {
                 size="sm"
                 className="h-9 px-5 text-[13px] font-medium rounded-full bg-primary hover:bg-primary-hover text-white shadow-sm shadow-primary/20 transition-colors"
                 onClick={() =>
-                  navigate.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`)
+                  navigate.push(
+                    `/login?callbackUrl=${encodeURIComponent(pathname)}`
+                  )
                 }
               >
                 Sign In
@@ -851,7 +981,9 @@ const Navbar = () => {
                     <Button
                       className="flex-1 h-10 rounded-full text-[13px] font-medium bg-primary hover:bg-primary-hover text-white transition-colors"
                       onClick={() =>
-                        navigate.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`)
+                        navigate.push(
+                          `/login?callbackUrl=${encodeURIComponent(pathname)}`
+                        )
                       }
                     >
                       Sign In

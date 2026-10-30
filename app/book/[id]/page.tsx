@@ -163,7 +163,7 @@ const BookDetailsPage = () => {
   }
 
   const priceInfo = getDisplayPrice();
-  const thumbnail = selectedPaper?.thumbnail || book.thumbnail;
+  const thumbnail = book.thumbnail;
 
   return (
     <div className="relative min-h-screen bg-white overflow-hidden">
@@ -238,6 +238,36 @@ const BookDetailsPage = () => {
                   </Badge>
                 )}
               </div>
+              {/* Part Thumbnails */}
+              {book.papers && book.papers.length > 0 && (
+                <div className="mt-4 grid grid-cols-4 gap-3">
+                  {book.papers
+                    .filter((p) => p.status === "PUBLISHED")
+                    .map((paper) => (
+                      <button
+                        key={paper.id}
+                        onClick={() => {
+                          setSelectedPaperId(paper.id);
+                          setQuantity(1);
+                        }}
+                        className={`relative rounded-lg overflow-hidden border-2 transition-all ${
+                          selectedPaperId === paper.id
+                            ? "border-primary shadow-md"
+                            : "border-slate-200 hover:border-slate-300"
+                        }`}
+                      >
+                        <img
+                          src={paper.thumbnail || book.thumbnail}
+                          alt={paper.name}
+                          className="w-full  object-cover"
+                        />
+                        {selectedPaperId === paper.id && (
+                          <div className="absolute inset-0 bg-primary/10" />
+                        )}
+                      </button>
+                    ))}
+                </div>
+              )}
             </motion.div>
 
             {/* Details */}
