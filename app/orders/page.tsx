@@ -264,8 +264,8 @@ const OrdersPage = () => {
 
   return (
     <div className="relative bg-white">
-      <main className="pt-24 pb-16 relative z-10">
-        <div className="container mx-auto px-4 lg:px-8 max-w-6xl">
+      <main className="pt-20 sm:pt-24 pb-24 lg:pb-16 relative z-10">
+        <div className="container mx-auto px-3 sm:px-4 lg:px-8 max-w-6xl">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -307,7 +307,7 @@ const OrdersPage = () => {
             </aside>
 
             {/* Right: scrollable orders list */}
-            <div className="flex-1 min-w-0 lg:max-h-[calc(100vh-12rem)] lg:overflow-y-auto lg:pr-2">
+            <div className="flex-1 min-w-0 lg:max-h-[calc(100vh-12rem)] lg:overflow-y-auto lg:pr-2 overflow-x-hidden">
               {isLoading ? (
                 <div className="space-y-4">
                   {Array.from({ length: 3 }).map((_, i) => (

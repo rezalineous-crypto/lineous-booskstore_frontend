@@ -240,7 +240,7 @@ const BookDetailsPage = () => {
               </div>
               {/* Part Thumbnails */}
               {book.papers && book.papers.length > 0 && (
-                <div className="mt-4 grid grid-cols-4 gap-3">
+                <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
                   {book.papers
                     .filter((p) => p.status === "PUBLISHED")
                     .map((paper) => (
@@ -250,7 +250,7 @@ const BookDetailsPage = () => {
                           setSelectedPaperId(paper.id);
                           setQuantity(1);
                         }}
-                        className={`relative rounded-lg overflow-hidden border-2 transition-all ${
+                        className={`relative rounded-lg overflow-hidden border-2 transition-all touch-target ${
                           selectedPaperId === paper.id
                             ? "border-primary shadow-md"
                             : "border-slate-200 hover:border-slate-300"
@@ -259,7 +259,7 @@ const BookDetailsPage = () => {
                         <img
                           src={paper.thumbnail || book.thumbnail}
                           alt={paper.name}
-                          className="w-full  object-cover"
+                          className="w-full h-16 sm:h-20 object-cover"
                         />
                         {selectedPaperId === paper.id && (
                           <div className="absolute inset-0 bg-primary/10" />
@@ -436,35 +436,29 @@ const BookDetailsPage = () => {
               </div>
 
               {/* Quantity & Add to Cart */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <div className="flex items-center border border-slate-200 rounded-xl bg-white shadow-sm">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8">
+                <div className="flex items-center border border-slate-200 rounded-xl bg-white shadow-sm w-full sm:w-auto">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-3 hover:bg-slate-50 transition-colors active:scale-95 text-slate-600"
+                    className="p-3 hover:bg-slate-50 transition-colors active:scale-95 text-slate-600 touch-target"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="px-6 font-semibold text-slate-900">
+                  <span className="px-6 font-semibold text-slate-900 flex-1 text-center">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity((q) => Math.min(q + 1))}
-                    // disabled={quantity}
-                    className="p-3 hover:bg-slate-50 transition-colors active:scale-95 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="p-3 hover:bg-slate-50 transition-colors active:scale-95 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed touch-target"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-                {/* {maxQuantity > 0 && quantity >= maxQuantity * 0.8 && (
-                  <p className="text-xs text-orange-600 mt-1">
-                    Only {maxQuantity - quantity} left in stock
-                  </p>
-                )} */}
 
                 <Button
                   size="lg"
                   disabled={isAddingToCart}
-                  className="flex-1 active:scale-95 transition-transform py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl border border-primary/20 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30"
+                  className="flex-1 active:scale-95 transition-transform h-12 sm:h-14 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl border border-primary/20 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 touch-target"
                   onClick={handleAddToCart}
                 >
                   {isAddingToCart ? (

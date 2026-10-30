@@ -96,8 +96,8 @@ const BooksContent = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="pt-24 pb-16">
-        <div className="container mx-auto px-4 lg:px-8">
+      <main className="pt-20 sm:pt-24 pb-24 lg:pb-16">
+        <div className="container mx-auto px-3 sm:px-4 lg:px-8">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}

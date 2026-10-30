@@ -50,7 +50,7 @@ export default function HeroBanner() {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
+    <section className="relative min-h-[100dvh] flex items-center overflow-hidden">
       {/* ── Background Layer ── */}
       <motion.div className="absolute inset-0 z-0" style={{ y: bgY }}>
         <div
@@ -66,12 +66,12 @@ export default function HeroBanner() {
 
       {/* ── Decorative Blobs ── */}
       <motion.div
-        className="absolute top-20 right-[15%] w-125 h-125 rounded-full bg-primary/20 blur-[100px] z-0"
+        className="absolute top-20 right-[15%] w-48 h-48 md:w-64 md:h-64 lg:w-125 lg:h-125 rounded-full bg-primary/20 blur-[80px] md:blur-[100px] z-0"
         animate={{ scale: [1, 1.2, 1], x: [0, 30, 0] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute bottom-0 left-[10%] w-100 h-100 rounded-full bg-accent/20 blur-[80px] z-0"
+        className="absolute bottom-0 left-[10%] w-40 h-40 md:w-64 md:h-64 lg:w-100 lg:h-100 rounded-full bg-accent/20 blur-[60px] md:blur-[80px] z-0"
         animate={{ scale: [1, 1.15, 1], y: [0, -20, 0] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -103,7 +103,7 @@ export default function HeroBanner() {
                 duration: 0.8,
                 ease: [0.25, 0.46, 0.45, 0.94] as const,
               }}
-              className="text-4xl md:text-5xl font-bold text-white leading-[1.15] mb-6 max-w-xl"
+              className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-[1.15] mb-6 max-w-xl"
             >
               A journey to achieve the{" "}
               <span className="relative inline-block">
@@ -137,7 +137,7 @@ export default function HeroBanner() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.7 }}
-              className="text-base text-gray-300 leading-relaxed mb-10 max-w-2xl"
+              className="text-sm sm:text-base text-gray-300 leading-relaxed mb-8 sm:mb-10 max-w-2xl"
             >
               CLC Resource is an ultimate HUB for Paper based Workbooks featuring
               real exam-style layouts with dedicated space to write the answers
@@ -191,7 +191,7 @@ export default function HeroBanner() {
             >
               <Button
                 size="lg"
-                className="h-14 px-8 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white text-base font-semibold shadow-xl shadow-charcoal/20 hover:shadow-2xl transition-all duration-300 group"
+                className="h-12 sm:h-14 px-6 sm:px-8 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white text-sm sm:text-base font-semibold shadow-xl shadow-charcoal/20 hover:shadow-2xl transition-all duration-300 group w-full sm:w-auto touch-target"
                 onClick={() => {
                   const el = document.getElementById("new-releases");
                   if (el) {

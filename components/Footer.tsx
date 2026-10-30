@@ -159,7 +159,7 @@ const Footer = () => {
       </div>
 
       <div className="border-t border-white/10">
-        <div className="container mx-auto px-4 lg:px-8 py-6">
+        <div className="container mx-auto px-4 lg:px-8 py-6 pb-20 lg:pb-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-white/60">
               © 2026 Core Learning Centre. All rights reserved.

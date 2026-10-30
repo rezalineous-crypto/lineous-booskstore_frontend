@@ -27,6 +27,7 @@ import {
   MenuTreeSubject,
   MenuTreeBook,
 } from "@/lib/types";
+import MobileMenuDrawer from "@/components/MobileMenuDrawer";
 
 export interface MenuItemProps {
   name: string;
@@ -926,81 +927,20 @@ const Navbar = () => {
             )}
 
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden ml-1 h-9 w-9 flex items-center justify-center rounded-lg hover:bg-muted/60 transition-colors duration-200"
+              onClick={() => setIsMenuOpen(true)}
+              className="lg:hidden ml-1 h-9 w-9 flex items-center justify-center rounded-lg hover:bg-muted/60 transition-colors duration-200 touch-target"
             >
-              {isMenuOpen ? (
-                <X className="w-5 h-5 text-slate-700" />
-              ) : (
-                <Menu className="w-5 h-5 text-slate-700" />
-              )}
+              <Menu className="w-5 h-5 text-slate-700" />
             </button>
           </div>
         </div>
       </div>
 
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="lg:hidden border-t border-slate-200 overflow-hidden bg-white/95 backdrop-blur-2xl"
-          >
-            <div className="p-4 space-y-1">
-              <form onSubmit={handleSearch} className="mb-3">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search books..."
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                />
-              </form>
-              {navLinks.map((link, idx) => (
-                <MenuItem
-                  key={idx}
-                  item={link}
-                  isMobile={true}
-                  toggleMobile={toggleMobile}
-                  mobileOpen={mobileOpen}
-                />
-              ))}
-
-              <div className="pt-4 flex gap-2 border-t border-slate-200 mt-4">
-                {mounted && isAuthenticated ? (
-                  <Button
-                    className="flex-1 h-10 rounded-full text-[13px] font-medium"
-                    onClick={() => navigate.push("/profile")}
-                  >
-                    My Profile
-                  </Button>
-                ) : (
-                  <>
-                    <Button
-                      className="flex-1 h-10 rounded-full text-[13px] font-medium bg-primary hover:bg-primary-hover text-white transition-colors"
-                      onClick={() =>
-                        navigate.push(
-                          `/login?callbackUrl=${encodeURIComponent(pathname)}`
-                        )
-                      }
-                    >
-                      Sign In
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1 h-10 rounded-full text-[13px] font-medium border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors"
-                    >
-                      Join
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <MobileMenuDrawer
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        navLinks={navLinks}
+      />
     </motion.nav>
   );
 };

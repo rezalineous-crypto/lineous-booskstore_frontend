@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import Providers from "./providers";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -27,12 +28,13 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={`${poppins.variable} ${poppinsDisplay.variable}`}>
       <body>
         <Providers>
-          <div className="relative min-h-screen bg-white overflow-hidden">
+          <div className="relative min-h-screen-safe bg-white">
             <Navbar />
-            <main className=" relative z-10">
+            <main className="relative z-10 pb-bottom-nav">
               {children}
             </main>
             <Footer />
+            <MobileBottomNav />
           </div>
         </Providers>
       </body>

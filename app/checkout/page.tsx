@@ -13,6 +13,7 @@ import {
   ChevronRight,
   MapPin,
   Plus,
+  Loader2,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -125,8 +126,8 @@ const CheckoutPage = () => {
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
 
-      <main className="pt-24 pb-16 relative z-10">
-        <div className="container mx-auto px-4 lg:px-8 max-w-6xl">
+      <main className="pt-20 sm:pt-24 pb-24 lg:pb-16 relative z-10">
+        <div className="container mx-auto px-3 sm:px-4 lg:px-8 max-w-6xl">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -219,7 +220,7 @@ const CheckoutPage = () => {
                           key={addr.id}
                           type="button"
                           onClick={() => setSelectedAddressId(addr.id)}
-                          className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-start gap-3 ${
+                          className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-start gap-3 touch-target ${
                             selectedAddressId === addr.id
                               ? "border-primary bg-primary/5 shadow-md"
                               : "border-border bg-card hover:border-primary/40"
@@ -511,6 +512,25 @@ const CheckoutPage = () => {
           </div>
         </div>
       </main>
+
+      {step === 3 && (
+        <div className="lg:hidden fixed bottom-16 left-0 right-0 bg-white border-t border-slate-200 p-3 safe-bottom z-40">
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-semibold touch-target"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Place Order"
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

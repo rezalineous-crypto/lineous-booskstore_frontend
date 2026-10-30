@@ -3,7 +3,7 @@
 import { Search, X, SlidersHorizontal, Calendar, Truck, Tag } from "lucide-react";
 import { Input } from "./ui/input";
 import { Separator } from "./ui/separator";
-import { useCategories } from "@/hooks/use-categories";
+// import { useCategories } from "@/hooks/use-categories";
 
 export type OrderDateRange = "all" | "today" | "week" | "month";
 
@@ -66,7 +66,7 @@ export function OrderFilters({ value, onChange, resultCount }: OrderFiltersProps
     { value: "month", label: "Last 30 Days" },
   ];
 
-  const { data: categories = [] } = useCategories();
+  // const { data: categories = [] } = useCategories();
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-shadow">
@@ -105,7 +105,7 @@ export function OrderFilters({ value, onChange, resultCount }: OrderFiltersProps
       <Separator className="my-4" />
 
       {/* Category filter */}
-      <div className="space-y-2 mb-5">
+      {/* <div className="space-y-2 mb-5">
         <label className="text-xs font-medium text-slate-500 uppercase tracking-wide flex items-center gap-1">
           <Tag className="w-3.5 h-3.5" /> Category
         </label>
@@ -137,7 +137,7 @@ export function OrderFilters({ value, onChange, resultCount }: OrderFiltersProps
             </button>
           ))}
         </div>
-      </div>
+      </div> */}
 
       <Separator className="my-4" />
 
