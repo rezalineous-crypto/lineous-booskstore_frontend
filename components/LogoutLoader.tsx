@@ -30,7 +30,7 @@ const LogoutLoader = ({
           animate={{ rotate: 360 }}
           transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
         />
-        {/* Center dot */}
+        {/* Centre dot */}
         <span className="absolute h-2.5 w-2.5 rounded-full bg-primary" />
       </div>
 

@@ -102,65 +102,77 @@ const MobileCategoryDrawer = ({
                   ))}
                 </div>
               ) : activePublication ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="p-2 space-y-2"
-                >
-                  {activePublication.subjects?.map(
-                    (subject: MenuTreeSubject, idx: number) => (
-                      <motion.button
-                        key={idx}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          const href = `/${activeCategory?.slug}/${activePublication.slug}/${subject.slug}`;
-                          handleNavigate(href);
-                        }}
-                        className="flex items-center justify-between w-full p-4 rounded-xl hover:bg-slate-50 text-slate-700 touch-target group group-active:bg-orange-50 active:text-orange-600"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Book className="w-5 h-5 text-slate-400 group-active:text-orange-600" />
-                          <span className="font-medium text-sm group-active:text-orange-600">
-                            {subject.name}
-                          </span>
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-slate-400 group-active:text-orange-600" />
-                      </motion.button>
-                    )
-                  )}
-                </motion.div>
-              ) : activeCategory ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="p-2 space-y-2"
-                >
-                  {activeCategory.publications?.map(
-                    (pub: MenuTreePublication, idx: number) => (
-                      <motion.button
-                        key={idx}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setActivePublication(pub)}
-                        className="flex items-center justify-between w-full p-4 rounded-xl hover:bg-slate-50 text-slate-700 touch-target group group-active:bg-orange-50 active:text-orange-600"
-                      >
-                        <div className="flex items-center gap-3">
-                          <BookOpen className="w-5 h-5 text-slate-400 group-active:text-orange-600" />
-                          <span className="font-medium text-sm">
-                            {pub.name}
-                          </span>
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-slate-400 group-active:text-orange-600" />
-                      </motion.button>
-                    )
-                  )}
-                </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="p-2 space-y-2"
+            >
+              {activePublication.subjects && activePublication.subjects.length > 0 ? (
+                activePublication.subjects.map(
+                  (subject: MenuTreeSubject, idx: number) => (
+                    <motion.button
+                      key={idx}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        const href = `/${activeCategory?.slug}/${activePublication.slug}/${subject.slug}`;
+                        handleNavigate(href);
+                      }}
+                      className="flex items-center justify-between w-full p-4 rounded-xl hover:bg-slate-50 text-slate-700 touch-target group group-active:bg-orange-50 active:text-orange-600"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Book className="w-5 h-5 text-slate-400 group-active:text-orange-600" />
+                        <span className="font-medium text-sm group-active:text-orange-600">
+                          {subject.name}
+                        </span>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-400 group-active:text-orange-600" />
+                    </motion.button>
+                  )
+                )
               ) : (
+                <div className="text-center py-4 text-xs text-slate-500">
+                  No current items available for this Category
+                </div>
+              )}
+            </motion.div>
+          ) : activeCategory ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="p-2 space-y-2"
+            >
+              {activeCategory.publications && activeCategory.publications.length > 0 ? (
+                activeCategory.publications.map(
+                  (pub: MenuTreePublication, idx: number) => (
+                    <motion.button
+                      key={idx}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setActivePublication(pub)}
+                      className="flex items-center justify-between w-full p-4 rounded-xl hover:bg-slate-50 text-slate-700 touch-target group group-active:bg-orange-50 active:text-orange-600"
+                    >
+                      <div className="flex items-center gap-3">
+                        <BookOpen className="w-5 h-5 text-slate-400 group-active:text-orange-600" />
+                        <span className="font-medium text-sm">
+                          {pub.name}
+                        </span>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-400 group-active:text-orange-600" />
+                    </motion.button>
+                  )
+                )
+              ) : (
+                <div className="text-center py-4 text-xs text-slate-500">
+                  No current items available for this Category
+                </div>
+              )}
+            </motion.div>
+          ) : (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}

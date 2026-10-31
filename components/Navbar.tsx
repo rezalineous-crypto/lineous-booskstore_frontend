@@ -159,19 +159,25 @@ const MenuItem = ({
                       )}
                     </div>
                   ) : (
-                    item.children!.map(
-                      (child: MenuItemProps | string, idx: number) => (
-                        <MobileSubItem
-                          key={idx}
-                          item={
-                            typeof child === "string"
-                              ? { name: child, children: [] }
-                              : child
-                          }
-                          toggleMobile={toggleMobile}
-                          mobileOpen={mobileOpen}
-                        />
+                    item.children && item.children.length > 0 ? (
+                      item.children!.map(
+                        (child: MenuItemProps | string, idx: number) => (
+                          <MobileSubItem
+                            key={idx}
+                            item={
+                              typeof child === "string"
+                                ? { name: child, children: [] }
+                                : child
+                            }
+                            toggleMobile={toggleMobile}
+                            mobileOpen={mobileOpen}
+                          />
+                        )
                       )
+                    ) : (
+                      <div className="text-center py-4 text-xs text-slate-500">
+                        No current items available for this Category
+                      </div>
                     )
                   )}
                 </div>
@@ -331,12 +337,13 @@ const DesktopMegaMenu = ({
                   </h3>
                 </div>
                 <div className="flex-1 overflow-y-auto max-h-[420px] py-2">
-                  {activeItem.children!.map(
-                    (child: MenuItemProps | string, idx: number) => {
-                      const childItem =
-                        typeof child === "string"
-                          ? { name: child, children: [] }
-                          : child;
+                  {activeItem.children && activeItem.children.length > 0 ? (
+                    activeItem.children!.map(
+                      (child: MenuItemProps | string, idx: number) => {
+                        const childItem =
+                          typeof child === "string"
+                            ? { name: child, children: [] }
+                            : child;
                       const childHasChildren =
                         childItem.children && childItem.children.length > 0;
                       const isActive = activeChildIndex === idx;
@@ -366,6 +373,11 @@ const DesktopMegaMenu = ({
                         </div>
                       );
                     }
+                  ))
+                  : (
+                    <div className="text-center py-4 text-xs text-slate-500">
+                      No current items available for this Category
+                    </div>
                   )}
                 </div>
               </div>
@@ -717,19 +729,6 @@ const Navbar = () => {
         };
       }) || [];
 
-    // Fallback to children if no publications
-    if (children.length === 0 && category.children) {
-      return {
-        name: category.name,
-        href: categoryHref,
-        children: category.children.map((child) => ({
-          name: child.name,
-          href: child.route || (child.slug ? `/${child.slug}` : undefined),
-          children: [],
-        })),
-      };
-    }
-
     return {
       name: category.name,
       href: categoryHref,
@@ -819,7 +818,7 @@ const Navbar = () => {
                   Learning
                 </span>
                 <span className="font-display text-xl font-semibold tracking-tight text-foreground ml-1">
-                  Center
+                  Centre
                 </span>
               </div>
               {/* Tagline */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -41,6 +41,7 @@ const BookDetailsPage = () => {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { addToCart, isAddingToCart } = useCartContext();
   const { user } = useAuth();
   const [quantity, setQuantity] = useState(1);
@@ -48,6 +49,11 @@ const BookDetailsPage = () => {
   const initializedRef = useRef(false);
 
   const categoryIdFromUrl = searchParams.get("categoryId");
+
+  const getCallbackUrl = () => {
+    const queryString = searchParams.toString();
+    return queryString ? `${pathname}?${queryString}` : pathname;
+  };
   const { data: book, isLoading, error } = useBook(params?.id as string);
 
   // Set default paper on book load
@@ -75,7 +81,7 @@ const BookDetailsPage = () => {
       toast.error("Please log in to add items to your cart", {
         description: "You need to be logged in to add books to your cart.",
       });
-      router.push("/login");
+      router.push(`/login?callbackUrl=${encodeURIComponent(getCallbackUrl())}`);
       return;
     }
     if (book) {

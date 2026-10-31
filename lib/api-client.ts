@@ -176,7 +176,7 @@ async function request<T>(
     clearAuthTokens();
     localStorage.removeItem("user");
     if (!window.location.pathname.startsWith("/login")) {
-      const callbackUrl = window.location.pathname;
+      const callbackUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
       window.location.assign(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
   }

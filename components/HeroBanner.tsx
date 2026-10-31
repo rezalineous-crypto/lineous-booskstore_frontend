@@ -124,7 +124,7 @@ export default function HeroBanner() {
                 transition={{ delay: 1.1, duration: 0.7 }}
               />
 
-              {/* Center book (only element with a looping animation) */}
+              {/* Centre book (only element with a looping animation) */}
               <motion.div
                 className="absolute left-1/2 top-1/2 z-10 w-32 h-44 sm:w-40 sm:h-56 -ml-16 sm:-ml-20 -mt-[88px] sm:-mt-28 rounded-2xl overflow-hidden shadow-2xl"
                 initial={{ opacity: 0, scale: 0.8 }}

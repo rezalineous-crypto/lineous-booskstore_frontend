@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   User,
@@ -44,6 +44,8 @@ import ProfileSkeleton from "@/components/ProfileSkeleton";
 const ProfilePage = () => {
   const { user, updateProfile, logout, isAuthenticated } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,9 +71,11 @@ const ProfilePage = () => {
   // Redirect guests to login (in an effect, never during render)
   useEffect(() => {
     if (!isAuthenticated && !isLoggingOut) {
-      router.push("/login");
+      const queryString = searchParams.toString();
+      const callbackUrl = queryString ? `${pathname}?${queryString}` : pathname;
+      router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
-  }, [isAuthenticated, isLoggingOut, router]);
+  }, [isAuthenticated, isLoggingOut, router, pathname, searchParams]);
 
   // Simulate loading state for skeleton display
   useEffect(() => {

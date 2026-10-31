@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -27,15 +27,19 @@ const OrderDetailPage = () => {
   const id = params?.id as string;
   const { isAuthenticated, user } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { data: order, isLoading, error } = useOrder(id);
   const { downloadReceipt, isDownloading } = useOrderContext();
 
   // Redirect guests to login (in an effect, never during render)
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push("/login");
+      const queryString = searchParams.toString();
+      const callbackUrl = queryString ? `${pathname}?${queryString}` : pathname;
+      router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, pathname, searchParams]);
 
   // Redirect if the order does not belong to the current user
   useEffect(() => {

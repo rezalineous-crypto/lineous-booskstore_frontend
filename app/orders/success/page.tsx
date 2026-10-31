@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   CheckCircle2,
@@ -25,6 +25,7 @@ function OrderSuccessContent() {
   const orderId = params.get("orderId");
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   const { data: order } = useOrder(orderId || "");
   const {
@@ -44,9 +45,11 @@ function OrderSuccessContent() {
   // Redirect guests to login (in an effect, never during render)
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push("/login");
+      const queryString = params.toString();
+      const callbackUrl = queryString ? `${pathname}?${queryString}` : pathname;
+      router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, pathname, params]);
 
   if (!isAuthenticated) {
     return null;

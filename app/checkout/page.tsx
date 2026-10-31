@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -48,6 +48,8 @@ const CheckoutPage = () => {
   const createOrderMutation = useCreateOrder();
   const { data: addresses = [], isLoading: addressesLoading } = useAddresses(user?.id);
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [step, setStep] = useState(1);
   const [shippingMethod, setShippingMethod] = useState("standard");
@@ -70,9 +72,11 @@ const CheckoutPage = () => {
   useEffect(() => {
     if (mounted && !user) {
       toast.error("Please login to checkout");
-      router.push("/login");
+      const queryString = searchParams.toString();
+      const callbackUrl = queryString ? `${pathname}?${queryString}` : pathname;
+      router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
-  }, [mounted, user, router]);
+  }, [mounted, user, router, pathname, searchParams]);
 
   if (!mounted || !user) {
     return (

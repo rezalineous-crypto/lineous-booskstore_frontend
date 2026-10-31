@@ -14,13 +14,13 @@ const MobileBrandBadge = () => {
     >
       <Link
         href="/"
-        aria-label="Core Learning Center home"
+        aria-label="Core Learning Centre home"
         className="flex items-center gap-2 rounded-r-lg border border-white/30 bg-white/60 py-1.5 pl-1.5 pr-3.5 shadow-lg shadow-black/10 backdrop-blur-md active:scale-95 transition-transform touch-target"
       >
         <img src="/logo.png" alt="" className="h-9 w-9 object-contain" />
         <div className="flex flex-col leading-none">
           <span className="font-display text-sm font-semibold tracking-tight text-slate-900">
-            Core <span className="text-primary">Learning</span> Center
+            Core <span className="text-primary">Learning</span> Centre
           </span>
           <span className="mt-0.5 font-display text-[9px] font-medium uppercase tracking-widest text-slate-500">
             Learn with Excellence

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -203,6 +203,8 @@ function OrderAccordionItem({
 const OrdersPage = () => {
   const { isAuthenticated, mounted, user } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [filters, setFilters] = useState<OrderFilterState>(
     DEFAULT_ORDER_FILTERS
   );
@@ -213,9 +215,11 @@ const OrdersPage = () => {
   // Guests can't have orders — send them to login
   useEffect(() => {
     if (mounted && !isAuthenticated) {
-      router.push("/login");
+      const queryString = searchParams.toString();
+      const callbackUrl = queryString ? `${pathname}?${queryString}` : pathname;
+      router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
-  }, [mounted, isAuthenticated, router]);
+  }, [mounted, isAuthenticated, router, pathname, searchParams]);
 
   if (!mounted || !isAuthenticated) {
     return (
