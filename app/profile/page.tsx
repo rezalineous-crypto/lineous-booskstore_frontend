@@ -42,7 +42,7 @@ import LogoutLoader from "@/components/LogoutLoader";
 import ProfileSkeleton from "@/components/ProfileSkeleton";
 
 const ProfilePage = () => {
-  const { user, updateProfile, logout, isAuthenticated } = useAuth();
+  const { user, updateProfile, logout, isAuthenticated, mounted } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -50,13 +50,12 @@ const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    phone: user?.phone || "",
-    address: user?.address || "",
-    city: user?.city || "",
-    country: user?.country || "",
-    bio: user?.bio || "",
+    name: "",
+    email: "",
+    phone: "",
+    city: "",
+    country: "",
+    bio: "",
   });
 
   const { data: addresses = [], isLoading: addressesLoading } = useAddresses(user?.id);
@@ -68,23 +67,63 @@ const ProfilePage = () => {
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [linkedAccounts, setLinkedAccounts] = useState<{ provider: string; email: string }[]>([]);
 
+  // Fetch fresh user data from server on mount (not from localStorage)
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await apiClient.get("/users/me");
+        const userData = response as unknown as {
+        id: string;
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+        phone?: string;
+        bio?: string;
+        city?: string;
+        country?: string;
+        avatar?: string;
+        role: "USER" | "ADMIN";
+      };
+      const fullName = `${userData.firstName || ""} ${userData.lastName || ""}`.trim();
+
+      // Update auth context with fresh server data
+      updateProfile({
+        ...userData,
+        name: fullName,
+        email: userData.email,
+      });
+
+      // Set form data from API response (not localStorage)
+      setFormData({
+        name: fullName,
+        email: userData.email || "",
+        phone: userData.phone || "",
+        city: userData.city || "",
+        country: userData.country || "",
+        bio: userData.bio || "",
+      });
+      } catch (error) {
+        toast.error("Failed to load profile");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [updateProfile]);
+
   // Redirect guests to login (in an effect, never during render)
   useEffect(() => {
+    if (!mounted) return;
     if (!isAuthenticated && !isLoggingOut) {
       const queryString = searchParams.toString();
       const callbackUrl = queryString ? `${pathname}?${queryString}` : pathname;
       router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
-  }, [isAuthenticated, isLoggingOut, router, pathname, searchParams]);
-
-  // Simulate loading state for skeleton display
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
+  }, [isAuthenticated, isLoggingOut, mounted, router, pathname, searchParams]);
 
   // Show skeleton for any transitional state (loading, auth check, redirecting)
-  if (isLoading || (!isAuthenticated && !isLoggingOut) || isLoggingOut) {
+  if (isLoading || (mounted && !isAuthenticated && !isLoggingOut) || isLoggingOut) {
     return <ProfileSkeleton />;
   }
 
@@ -341,20 +380,6 @@ const ProfilePage = () => {
                           className="pl-10 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
                         />
                       </div>
-                    </div>
-
-                    <div className="sm:col-span-2 space-y-2">
-                      <Label htmlFor="address" className="text-slate-700 text-sm font-medium">Address</Label>
-                      <Input
-                        id="address"
-                        placeholder="Add your address"
-                        value={formData.address}
-                        onChange={(e) =>
-                          setFormData({ ...formData, address: e.target.value })
-                        }
-                        disabled={!isEditing}
-                        className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
-                      />
                     </div>
 
                     <div className="sm:col-span-2 space-y-2">

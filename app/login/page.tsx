@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -29,7 +29,6 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -50,6 +49,15 @@ const LoginPage = () => {
     router.push(isSafeUrl(callbackUrl) ? callbackUrl : "/");
   };
 
+  // If already authenticated (token in localStorage), redirect away from login page
+  // This prevents redirect loops when middleware sends to login but token exists
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      redirectAfterAuth();
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -68,11 +76,11 @@ const LoginPage = () => {
           return;
         }
 
-        await register(formData.email, formData.password, formData.name);
+        await register(formData.email, formData.password);
         toast.success("Account created!", {
           description: "Welcome to Core Learning Centre.",
         });
-        redirectAfterAuth();
+        router.push("/profile/complete");
       }
     } catch (error) {
       toast.error(
@@ -244,51 +252,7 @@ const LoginPage = () => {
             className="space-y-4 lg:space-y-5"
           >
             <AnimatePresence mode="wait">
-              {!isLogin && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                  animate={{ opacity: 1, height: "auto", marginBottom: 20 }}
-                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                  className="space-y-2 overflow-hidden"
-                >
-                  <Label
-                    htmlFor="name"
-                    className="text-sm font-medium text-slate-700 ml-1"
-                  >
-                    Full Name
-                  </Label>
-                  <div className="relative group">
-                    <div
-                      className={`absolute inset-0 rounded-xl bg-gradient-to-r from-primary/20 to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm ${
-                        focusedField === "name" ? "opacity-100" : ""
-                      }`}
-                    />
-                    <div className="relative flex items-center">
-                      <User
-                        className={`absolute left-4 w-[18px] h-[18px] transition-colors duration-300 ${
-                          focusedField === "name"
-                            ? "text-primary"
-                            : "text-slate-400"
-                        }`}
-                      />
-                      <Input
-                        id="name"
-                        type="text"
-                        placeholder="John Doe"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                        onFocus={() => setFocusedField("name")}
-                        onBlur={() => setFocusedField(null)}
-                        className="pl-11 pr-4 h-12 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300"
-                        required={!isLogin}
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-              )}
+              {!isLogin && null}
             </AnimatePresence>
 
             <div className="space-y-2">

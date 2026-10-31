@@ -32,7 +32,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   mounted: boolean;
   login: (email: string, password: string) => Promise<AuthResponse>;
-  register: (email: string, password: string, name: string) => Promise<AuthResponse>;
+  register: (email: string, password: string) => Promise<AuthResponse>;
   logout: () => void;
   updateProfile: (updates: Partial<User>) => void;
   socialLogin: (
@@ -106,13 +106,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const register = useCallback(
-    async (email: string, password: string, name: string): Promise<AuthResponse> => {
+    async (email: string, password: string): Promise<AuthResponse> => {
       const result = await registerMutation.mutateAsync({ email, password });
-      const userData: User = {
-        ...result.user,
-        name,
-      };
-      setUser(userData);
+      setUser(result.user);
       setToken(result.accessToken);
       if (result.refreshToken) setRefreshToken(result.refreshToken);
       return result;
