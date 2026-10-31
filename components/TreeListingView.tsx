@@ -30,7 +30,7 @@ export default function TreeListingView({
             <div className="animate-pulse">
               <div className="h-8 bg-muted rounded mb-4" />
               <div className="h-6 bg-muted rounded w-1/3 mb-8" />
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {[...Array(8)].map((_, i) => (
                   <div key={i} className="h-64 bg-muted rounded-xl" />
                 ))}
@@ -108,7 +108,7 @@ export default function TreeListingView({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6"
+              className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6"
             >
               {books.map((book, index) => (
                 <div

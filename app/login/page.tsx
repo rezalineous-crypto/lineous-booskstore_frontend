@@ -43,7 +43,8 @@ const LoginPage = () => {
   const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   // Only allow relative paths to prevent open-redirect attacks
-  const isSafeUrl = (url: string) => url.startsWith("/") && !url.startsWith("//");
+  const isSafeUrl = (url: string) =>
+    url.startsWith("/") && !url.startsWith("//");
 
   const redirectAfterAuth = () => {
     router.push(isSafeUrl(callbackUrl) ? callbackUrl : "/");
@@ -98,7 +99,6 @@ const LoginPage = () => {
     <div className="relative min-h-screen w-full overflow-hidden bg-white flex flex-col lg:flex-row">
       {/* Ambient Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Gradient orbs - soft light versions */}
         <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-primary/15 blur-[120px]" />
         <div
           className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-amber-200/20 blur-[100px]"
@@ -109,21 +109,20 @@ const LoginPage = () => {
           style={{ animationDelay: "4s" }}
         />
 
-        {/* Floating particles */}
+        {/* Floating particles (only 8 on phones, all 20 from sm up) */}
         {particles.map((p) => (
           <motion.div
             key={p.id}
-            className="absolute rounded-full bg-slate-300/40"
+            className={`absolute rounded-full bg-slate-300/40 ${
+              p.id >= 8 ? "hidden sm:block" : ""
+            }`}
             style={{
               left: `${p.x}%`,
               top: `${p.y}%`,
               width: p.size,
               height: p.size,
             }}
-            animate={{
-              y: [0, -30, 0],
-              opacity: [0.2, 0.6, 0.2],
-            }}
+            animate={{ y: [0, -30, 0], opacity: [0.2, 0.6, 0.2] }}
             transition={{
               duration: p.duration,
               delay: p.delay,
@@ -143,19 +142,31 @@ const LoginPage = () => {
         />
       </div>
 
+      {/* Mobile banner: same library image as desktop, fades into the page */}
+      <div className="lg:hidden absolute inset-x-0 top-0 h-56 z-0 pointer-events-none">
+        <img
+          src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&h=600&fit=crop"
+          alt=""
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-white" />
+      </div>
+
       {/* Left Side - Form */}
       <motion.div
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="relative z-10 w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12"
+        className="relative z-10 w-full lg:w-1/2 flex items-center justify-center px-4 pt-36 pb-8 lg:p-12"
       >
-        <div className="w-full max-w-[420px]">
-          {/* Back link */}
+        {/* Mobile: floating card. Desktop: plain wrapper */}
+        <div className="w-full max-w-[420px] rounded-3xl border border-white/60 bg-white p-5 shadow-xl shadow-slate-900/10 sm:p-8 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
+          {/* Back link (desktop only; the mobile brand badge already links home) */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
+            className="hidden lg:block"
           >
             <Link
               href="/"
@@ -164,7 +175,6 @@ const LoginPage = () => {
               <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-slate-200 group-hover:border-slate-300 group-hover:bg-slate-50 transition-all duration-300 shadow-sm">
                 <Home className="w-4 h-4" />
               </div>
-              {/* <span className="text-sm font-medium">Back to Home</span> */}
             </Link>
           </motion.div>
 
@@ -173,15 +183,12 @@ const LoginPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="mb-10"
+            className="mb-6 lg:mb-10"
           >
-            <h1 className="text-4xl lg:text-[2.75rem] font-bold text-slate-900 tracking-tight leading-[1.1] mb-3">
+            <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-slate-900 tracking-tight leading-[1.1] mb-2 lg:mb-3">
               {isLogin ? (
                 <>
-                  Welcome{" "}
-                  <span className="">
-                    back
-                  </span>
+                  Welcome <span className="">back</span>
                 </>
               ) : (
                 <>
@@ -192,11 +199,11 @@ const LoginPage = () => {
                 </>
               )}
             </h1>
-            <p className="text-slate-600 text-base leading-relaxed">
+            {/* <p className="text-slate-600 text-sm lg:text-base leading-relaxed">
               {isLogin
                 ? "Sign in to access your curated library and continue exploring worlds within pages."
                 : "Join thousands of readers. Your next favorite story is waiting to be discovered."}
-            </p>
+            </p> */}
           </motion.div>
 
           {/* Social Login Buttons */}
@@ -204,10 +211,10 @@ const LoginPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="space-y-3 mb-8"
+            className="space-y-3 mb-6 lg:mb-8"
           >
             <GoogleButton onSuccess={redirectAfterAuth} />
-          {/**  <FacebookButton onSuccess={() => router.push("/")} />
+            {/**  <FacebookButton onSuccess={() => router.push("/")} />
             <AppleButton onSuccess={() => router.push("/")} /> */}
           </motion.div>
 
@@ -216,13 +223,13 @@ const LoginPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="relative mb-8"
+            className="relative mb-6 lg:mb-8"
           >
             <div className="absolute inset-0 flex items-center">
               <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-white px-4 text-xs font-medium text-slate-500 tracking-widest uppercase">
+              <span className="bg-white px-3 lg:px-4 text-[10px] lg:text-xs font-medium text-slate-500 tracking-widest uppercase">
                 Or continue with email
               </span>
             </div>
@@ -234,7 +241,7 @@ const LoginPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
             onSubmit={handleSubmit}
-            className="space-y-5"
+            className="space-y-4 lg:space-y-5"
           >
             <AnimatePresence mode="wait">
               {!isLogin && (
@@ -261,8 +268,8 @@ const LoginPage = () => {
                       <User
                         className={`absolute left-4 w-[18px] h-[18px] transition-colors duration-300 ${
                           focusedField === "name"
-                        ? "text-primary"
-                        : "text-slate-400"
+                            ? "text-primary"
+                            : "text-slate-400"
                         }`}
                       />
                       <Input
@@ -359,7 +366,10 @@ const LoginPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors duration-200 p-1"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors duration-200 p-2"
                   >
                     {showPassword ? (
                       <EyeOff className="w-[18px] h-[18px]" />
@@ -396,8 +406,8 @@ const LoginPage = () => {
                       <Lock
                         className={`absolute left-4 w-[18px] h-[18px] transition-colors duration-300 ${
                           focusedField === "confirmPassword"
-                        ? "text-primary"
-                        : "text-slate-400"
+                            ? "text-primary"
+                            : "text-slate-400"
                         }`}
                       />
                       <Input
@@ -431,7 +441,7 @@ const LoginPage = () => {
               >
                 <button
                   type="button"
-                  className="text-sm text-slate-500 hover:text-primary transition-colors duration-300 font-medium"
+                  className="text-sm text-slate-500 hover:text-primary transition-colors duration-300 font-medium py-1"
                 >
                   Forgot password?
                 </button>
@@ -479,7 +489,7 @@ const LoginPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
-            className="mt-8 text-center"
+            className="mt-6 lg:mt-8 text-center"
           >
             <p className="text-slate-500 text-sm">
               {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
@@ -496,72 +506,19 @@ const LoginPage = () => {
         </div>
       </motion.div>
 
-      {/* Right Side - Image with Glassmorphism Overlay */}
+      {/* Right Side - Image (desktop only) */}
       <motion.div
         initial={{ opacity: 0, scale: 1.05 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
         className="hidden lg:block lg:w-1/2 relative overflow-hidden"
       >
-        {/* Background Image */}
         <img
           src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1200&h=1600&fit=crop"
           alt="Library"
           className="absolute inset-0 w-full h-full object-cover"
         />
-
-        {/* Light overlay with gradient */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
-        {/* <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent" /> */}
-
-        {/* Glassmorphism Quote Card */}
-        <div className="absolute bottom-12 left-12 right-12">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.8 }}
-            className="relative"
-          >
-            {/* Glass card */}
-            {/* <div className="relative p-8 rounded-2xl overflow-hidden">
-              Glass effect layers
-              <div className="absolute inset-0 bg-white/80 backdrop-blur-xl border border-slate-200/60 rounded-2xl shadow-xl" />
-               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent rounded-2xl" />
-
-              Content
-              <div className="relative z-10">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 mt-1">
-                    <svg
-                      width="32"
-                      height="32"
-                      viewBox="0 0 32 32"
-                      fill="none"
-                      className="text-primary/70"
-                    >
-                      <path
-                        d="M10 18c-2.2 0-4-1.8-4-4s1.8-4 4-4c.6 0 1.2.1 1.7.4C11.2 7.6 9.2 6 7 6v-2c4.4 0 8 3.6 8 8v6h-5zm14 0c-2.2 0-4-1.8-4-4s1.8-4 4-4c.6 0 1.2.1 1.7.4C25.2 7.6 23.2 6 21 6v-2c4.4 0 8 3.6 8 8v6h-5z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-lg lg:text-xl text-slate-700 font-light leading-relaxed italic mb-4">
-                      A reader lives a thousand lives before he dies. The man
-                      who never reads lives only one.
-                    </p>
-                    <footer className="flex items-center gap-3">
-                      <div className="h-px w-8 bg-gradient-to-r from-primary/70 to-transparent" />
-                      <span className="text-sm font-medium text-primary/90 tracking-wide">
-                        George R.R. Martin
-                      </span>
-                    </footer>
-                  </div>
-                </div>
-              </div>
-            </div> */}
-          </motion.div>
-        </div>
 
         {/* Decorative corner elements */}
         <div className="absolute top-8 right-8 w-20 h-20 border-t border-r border-slate-300/60 rounded-tr-2xl" />

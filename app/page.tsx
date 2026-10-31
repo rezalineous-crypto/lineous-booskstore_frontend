@@ -1,7 +1,7 @@
 import HeroBanner from "../components/HeroBanner";
 import NewReleases from "../components/NewReleases";
 import Featured from "../components/Featured";
-import DealOfTheDay from "../components/DealOfTheDay";
+// import DealOfTheDay from "../components/DealOfTheDay";
 import PopularBooks from "../components/PopularBooks";
 import WhyChooseUs from "../components/home/WhyChooseUs";
 import SiteStats from "../components/home/SiteStats";

@@ -28,7 +28,7 @@ const PublicationPage = () => {
               <div className="animate-pulse">
                 <div className="h-8 bg-muted rounded mb-4" />
                 <div className="h-6 bg-muted rounded w-1/3 mb-8" />
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {[...Array(8)].map((_, i) => (
                     <div key={i} className="h-64 bg-muted rounded-xl" />
                   ))}

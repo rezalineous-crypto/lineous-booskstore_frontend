@@ -10,14 +10,12 @@ import {
   Truck,
   Lock,
   Check,
-  ChevronRight,
   MapPin,
   Plus,
   Loader2,
+  ShoppingBag,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
 import { Separator } from "../../components/ui/separator";
 
@@ -29,6 +27,20 @@ import { AddressFormDialog } from "@/components/AddressFormDialog";
 import { Address } from "../../lib/types";
 import { toast } from "sonner";
 import { getEffectivePrice, formatPrice } from "@/lib/price-utils";
+
+// Shared look for every card on the page
+const cardClass =
+  "relative overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm shadow-slate-200/60 sm:p-6";
+
+// Radio rows highlight themselves when their radio is checked (Tailwind v4 has-[] variant)
+const radioRowClass =
+  "flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5";
+
+const primaryBtnClass =
+  "h-12 rounded-xl border border-primary/20 bg-orange-500 font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:bg-orange-600 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98] cursor-pointer";
+
+const secondaryBtnClass =
+  "h-12 rounded-xl border-border bg-card px-6 text-body transition-transform hover:border-primary/40 hover:bg-muted active:scale-[0.98]";
 
 const CheckoutPage = () => {
   const { items, totalPrice, clearCart, isLoading: cartLoading } = useCartContext();
@@ -51,8 +63,8 @@ const CheckoutPage = () => {
     }
   }, [addresses, selectedAddressId]);
 
-  const selectedAddress = addresses.find((a) => a.id === selectedAddressId) || newlyCreatedAddress;
-
+  const selectedAddress =
+    addresses.find((a) => a.id === selectedAddressId) || newlyCreatedAddress;
 
   // Checkout requires an account — send guests to login
   useEffect(() => {
@@ -64,23 +76,34 @@ const CheckoutPage = () => {
 
   if (!mounted || !user) {
     return (
-      <div className="relative min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Redirecting to login…</p>
+      <div className="relative flex min-h-screen items-center justify-center bg-background">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <p className="text-sm">Redirecting to login…</p>
+        </div>
       </div>
     );
   }
 
   if (items.length === 0 && !cartLoading) {
     return (
-      <div className="relative min-h-screen bg-background overflow-hidden">
-        <div className="pt-32 text-center relative z-10">
-          <h1 className="font-display text-2xl font-bold mb-4 text-heading">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4">
+        <div className="relative z-10 text-center">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+            <ShoppingBag className="h-8 w-8 text-primary" />
+          </div>
+          <h1 className="mb-2 font-display text-2xl font-bold text-heading">
             Your cart is empty
           </h1>
-          <p className="text-muted-foreground mb-6">
+          <p className="mb-6 text-muted-foreground">
             Add some books to get started!
           </p>
-          <Button onClick={() => router.push("/")} className="bg-gradient-to-r from-primary via-primary-hover to-primary text-white border border-primary/20 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30">Browse Books</Button>
+          <Button
+            onClick={() => router.push("/")}
+            className="h-12 rounded-xl border border-primary/20 bg-gradient-to-r from-primary via-primary-hover to-primary px-8 text-white shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30"
+          >
+            Browse Books
+          </Button>
         </div>
       </div>
     );
@@ -125,118 +148,150 @@ const CheckoutPage = () => {
   ];
 
   return (
-    <div className="relative min-h-screen bg-background overflow-hidden">
-
-      <main className="pt-20 sm:pt-24 pb-24 lg:pb-16 relative z-10">
-        <div className="container mx-auto px-3 sm:px-4 lg:px-8 max-w-6xl">
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      {/* pt-20 clears the floating brand badge on mobile; step 3 gets extra bottom room for the sticky bar */}
+      <main
+        className={`relative z-10 pt-20 sm:pt-24 lg:pb-16 ${
+          step === 3 ? "pb-44" : "pb-24"
+        }`}
+      >
+        <div className="container mx-auto max-w-6xl px-4 lg:px-8">
           {/* Header */}
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="mb-5 sm:mb-8"
           >
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-4"
+              className="mb-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="h-4 w-4" />
               Continue Shopping
             </Link>
-            <h1 className="font-display text-3xl lg:text-4xl font-bold text-heading">
+            <h1 className="font-display text-2xl font-bold text-heading sm:text-3xl lg:text-4xl">
               Checkout
             </h1>
           </motion.div>
 
-          {/* Progress Steps */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-center justify-center gap-2 sm:gap-4 mb-8 sm:mb-12 overflow-x-auto py-2"
-          >
+          {/* Progress: compact bar on phones */}
+          <div className="mb-5 sm:hidden">
+            <div className="mb-2 flex items-center justify-between text-sm">
+              <span className="font-semibold text-foreground">
+                {steps[step - 1].label}
+              </span>
+              <span className="text-muted-foreground">
+                Step {step} of {steps.length}
+              </span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+              <motion.div
+                className="h-full rounded-full bg-accent"
+                initial={false}
+                animate={{ width: `${(step / steps.length) * 100}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+          </div>
+
+          {/* Progress: full stepper from sm up */}
+          <div className="mb-10 hidden items-center sm:flex">
             {steps.map((s, i) => (
-              <div key={s.number} className="flex items-center flex-shrink-0">
-                <div
-                  className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full font-semibold text-sm transition-all duration-300 ${
-                    step >= s.number
-                      ? "bg-accent text-white shadow-lg shadow-primary/20 border border-primary/20"
-                      : "bg-muted text-muted-foreground border border-border"
-                  }`}
-                >
-                  {step > s.number ? (
-                    <Check className="w-4 h-4 sm:w-5 sm:w-5" />
-                  ) : (
-                    s.number
-                  )}
+              <div
+                key={s.number}
+                className={`flex items-center ${
+                  i < steps.length - 1 ? "flex-1" : ""
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm font-semibold transition-all duration-300 ${
+                      step >= s.number
+                        ? "border-primary/20 bg-accent text-white shadow-lg shadow-primary/20"
+                        : "border-border bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {step > s.number ? <Check className="h-5 w-5" /> : s.number}
+                  </div>
+                  <span
+                    className={`text-sm font-medium ${
+                      step >= s.number
+                        ? "text-foreground"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {s.label}
+                  </span>
                 </div>
-                <span
-                  className={`ml-2 hidden xs:block ${
-                    step >= s.number
-                      ? "text-foreground"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {s.label}
-                </span>
                 {i < steps.length - 1 && (
-                  <ChevronRight className="w-4 h-4 mx-2 text-slate-400 flex-shrink-0" />
+                  <div
+                    className={`mx-4 h-0.5 flex-1 rounded-full transition-colors duration-300 ${
+                      step > s.number ? "bg-accent" : "bg-border"
+                    }`}
+                  />
                 )}
               </div>
             ))}
-          </motion.div>
+          </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
             {/* Form Section */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="lg:col-span-2 space-y-8"
+              key={step}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6 lg:col-span-2"
             >
               {/* Step 1: Shipping */}
               {step === 1 && (
-                <div className="relative rounded-2xl p-6 shadow-sm shadow-slate-200/60 border border-border bg-card">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-transparent rounded-2xl pointer-events-none" />
-                  <h2 className="font-display text-xl font-semibold mb-6 flex items-center gap-2 text-heading relative z-10">
-                    <Truck className="w-5 h-5 text-primary" />
+                <div className={cardClass}>
+                  <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/[0.04] via-transparent to-transparent" />
+
+                  <h2 className="relative z-10 mb-5 flex items-center gap-3 font-display text-lg font-semibold text-heading sm:text-xl">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                      <Truck className="h-5 w-5 text-primary" />
+                    </span>
                     Shipping Information
                   </h2>
 
-                  {/* Select Address Section */}
-                  <h3 className="font-display text-lg font-semibold mb-4 flex items-center gap-2 text-heading">
-                    <MapPin className="w-5 h-5 text-primary" />
+                  <h3 className="relative z-10 mb-3 flex items-center gap-2 font-semibold text-foreground">
+                    <MapPin className="h-4 w-4 text-primary" />
                     Select an address
                   </h3>
 
                   {addressesLoading ? (
-                    <div className="space-y-3 mb-6">
+                    <div className="relative z-10 mb-4 grid gap-3 md:grid-cols-2">
                       {[...Array(2)].map((_, i) => (
                         <div key={i} className="animate-pulse">
-                          <div className="h-20 bg-muted rounded-xl" />
+                          <div className="h-28 rounded-xl bg-muted" />
                         </div>
                       ))}
                     </div>
                   ) : addresses.length > 0 ? (
-                    <div className="space-y-3 mb-6">
+                    <div className="relative z-10 mb-4 grid gap-3 md:grid-cols-2">
                       {addresses.map((addr) => (
                         <button
                           key={addr.id}
                           type="button"
                           onClick={() => setSelectedAddressId(addr.id)}
-                          className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-start gap-3 touch-target ${
+                          aria-pressed={selectedAddressId === addr.id}
+                          className={`touch-target relative flex w-full items-start gap-3 rounded-xl border-2 p-4 text-left transition-all active:scale-[0.99] ${
                             selectedAddressId === addr.id
                               ? "border-primary bg-primary/5 shadow-md"
                               : "border-border bg-card hover:border-primary/40"
                           }`}
                         >
                           <MapPin
-                            className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
+                            className={`mt-0.5 h-5 w-5 shrink-0 ${
                               selectedAddressId === addr.id
                                 ? "text-primary"
                                 : "text-muted-foreground"
                             }`}
                           />
-                          <div className="flex-1 min-w-0">
+                          <div className="min-w-0 flex-1 pr-6">
                             <p className="font-medium text-foreground">{addr.name}</p>
-                            <p className="text-sm text-muted-foreground truncate">
+                            <p className="break-words text-sm text-muted-foreground">
                               {addr.addressLine}
                             </p>
                             <p className="text-sm text-muted-foreground">
@@ -249,19 +304,21 @@ const CheckoutPage = () => {
                                 {addr.postalCode && ` ${addr.postalCode}`}
                               </p>
                             )}
-                            <p className="text-sm text-muted-foreground">
-                              Phone: {addr.phone}
+                            <p className="mt-1 text-sm font-medium text-foreground/80">
+                              {addr.phone}
                             </p>
                           </div>
                           {selectedAddressId === addr.id && (
-                            <Check className="w-5 h-5 text-primary flex-shrink-0" />
+                            <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                              <Check className="h-3 w-3 text-white" />
+                            </span>
                           )}
                         </button>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8 rounded-xl border-2 border-dashed border-border mb-6">
-                      <MapPin className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+                    <div className="relative z-10 mb-4 rounded-xl border-2 border-dashed border-border py-8 text-center">
+                      <MapPin className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
                       <p className="text-muted-foreground">No saved addresses yet</p>
                     </div>
                   )}
@@ -269,94 +326,88 @@ const CheckoutPage = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full justify-between"
+                    className="relative z-10 h-12 w-full justify-between rounded-xl active:scale-[0.99]"
                     onClick={() => setIsAddressDialogOpen(true)}
                   >
                     <span className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
+                      <MapPin className="h-4 w-4" />
                       Create New Address
                     </span>
-                    <Plus className="w-4 h-4" />
+                    <Plus className="h-4 w-4" />
                   </Button>
 
                   <Separator className="my-6 bg-border" />
 
-                  <h3 className="font-semibold mb-4 text-foreground">Shipping Method</h3>
+                  <h3 className="relative z-10 mb-3 font-semibold text-foreground">
+                    Shipping Method
+                  </h3>
                   <RadioGroup
                     value={shippingMethod}
                     onValueChange={setShippingMethod}
-                    className="space-y-3"
+                    className="relative z-10 space-y-3"
                   >
-                    <label className="flex items-center justify-between p-4 border rounded-xl cursor-pointer hover:border-primary/40 transition-colors bg-card border-border">
-                      <div className="flex items-center gap-3">
-                        <RadioGroupItem value="standard" className="border-border text-primary" />
-                        <div>
-                          <p className="font-medium text-foreground">Standard Shipping</p>
-                          <p className="text-sm text-muted-foreground">
-                            2-3 business days
-                          </p>
-                        </div>
+                    <label className={radioRowClass}>
+                      <RadioGroupItem
+                        value="standard"
+                        className="mt-1 border-border text-primary"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-foreground">Standard Shipping</p>
+                        <p className="text-sm text-muted-foreground">
+                          2-3 business days
+                        </p>
+                        <p className="mt-1 text-sm font-medium text-primary">
+                          Delivery charge will depend on your location
+                        </p>
                       </div>
-                      <span className="font-semibold text-primary">
-                        Delivery charge will depend on your location
-                      </span>
                     </label>
-                    {/* <label className="flex items-center justify-between p-4 border rounded-xl cursor-pointer hover:border-primary/40 transition-colors bg-card border-border">
-                      <div className="flex items-center gap-3">
-                        <RadioGroupItem value="express" className="border-border text-primary" />
-                        <div>
-                          <p className="font-medium text-foreground">Express Shipping</p>
-                          <p className="text-sm text-muted-foreground">
-                            2-3 business days
-                          </p>
-                        </div>
-                      </div>
-                      <span className="font-semibold text-primary">
-                        Delivery charge will depend on your location
-                      </span>
-                    </label> */}
                   </RadioGroup>
 
                   <Button
-                    className="w-full mt-6 active:scale-95 transition-transform bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl border border-primary/20 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 cursor-pointer "
+                    className={`relative z-10 mt-6 w-full ${primaryBtnClass}`}
                     onClick={() => setStep(2)}
                   >
                     Continue to Payment
-                 </Button>
+                  </Button>
                 </div>
               )}
 
-               {/* Step 2: Payment */}
-               {step === 2 && (
-                <div className="relative rounded-2xl p-6 shadow-sm shadow-slate-200/60 border border-border bg-card">
-                  <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.04] via-transparent to-transparent rounded-2xl pointer-events-none" />
-                  <h2 className="font-display text-xl font-semibold mb-6 flex items-center gap-2 text-heading relative z-10">
-                    <CreditCard className="w-5 h-5 text-primary" />
+              {/* Step 2: Payment */}
+              {step === 2 && (
+                <div className={cardClass}>
+                  <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-accent/[0.04] via-transparent to-transparent" />
+
+                  <h2 className="relative z-10 mb-5 flex items-center gap-3 font-display text-lg font-semibold text-heading sm:text-xl">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                      <CreditCard className="h-5 w-5 text-primary" />
+                    </span>
                     Payment Method
                   </h2>
 
                   <RadioGroup
                     value={paymentMethod}
                     onValueChange={setPaymentMethod}
-                    className="space-y-3 mb-6"
+                    className="relative z-10 mb-6 space-y-3"
                   >
-                    <label className="flex items-center gap-3 p-4 border rounded-xl cursor-pointer hover:border-primary/40 transition-colors bg-card border-border">
+                    <label className={`${radioRowClass} items-center`}>
                       <RadioGroupItem value="COD" className="border-border text-primary" />
-                      <CreditCard className="w-5 h-5 text-primary" />
-                      <span className="font-medium text-foreground">Cash on Delivery</span>
+                      <CreditCard className="h-5 w-5 text-primary" />
+                      <span className="font-medium text-foreground">
+                        Cash on Delivery
+                      </span>
                     </label>
                   </RadioGroup>
 
-                  <div className="flex gap-4 mt-6">
+                  <div className="relative z-10 flex gap-3">
                     <Button
                       variant="outline"
                       onClick={() => setStep(1)}
-                      className="active:scale-95 transition-transform bg-card border-border text-body hover:bg-muted hover:border-primary/40"
+                      className={secondaryBtnClass}
                     >
                       Back
                     </Button>
                     <Button
-                      className="flex-1 active:scale-95 transition-transform bg-orange-500 hover:bg-orange-600 cursor-pointer text-white font-semibold rounded-xl border border-primary/20 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30"
+                      className={`flex-1 ${primaryBtnClass}`}
                       onClick={() => setStep(3)}
                     >
                       Review Order
@@ -367,27 +418,35 @@ const CheckoutPage = () => {
 
               {/* Step 3: Review */}
               {step === 3 && (
-                <div className="relative rounded-2xl p-6 shadow-sm shadow-slate-200/60 border border-border bg-card">
-                  <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.04] via-transparent to-transparent rounded-2xl pointer-events-none" />
-                  <h2 className="font-display text-xl font-semibold mb-6 flex items-center gap-2 text-heading relative z-10">
-                    <Check className="w-5 h-5 text-accent" />
+                <div className={cardClass}>
+                  <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-accent/[0.04] via-transparent to-transparent" />
+
+                  <h2 className="relative z-10 mb-5 flex items-center gap-3 font-display text-lg font-semibold text-heading sm:text-xl">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/10">
+                      <Check className="h-5 w-5 text-accent" />
+                    </span>
                     Review Your Order
                   </h2>
 
-                  <div className="space-y-4 mb-6">
-                    <div className="p-4 bg-muted rounded-xl border border-border">
-                      <h3 className="font-semibold mb-2 text-foreground">Shipping Address</h3>
+                  <div className="relative z-10 mb-5 grid gap-3 md:grid-cols-2">
+                    <div className="rounded-xl border border-border bg-muted p-4">
+                      <h3 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        Shipping Address
+                      </h3>
                       {selectedAddress ? (
-                        <p className="text-muted-foreground">
-                          {selectedAddress.name}
+                        <p className="break-words text-sm leading-relaxed text-muted-foreground">
+                          <span className="font-medium text-foreground">
+                            {selectedAddress.name}
+                          </span>
                           <br />
                           {selectedAddress.addressLine}
                           <br />
                           {selectedAddress.district}
                           {selectedAddress.area && `, ${selectedAddress.area}`}
-                          <br />
                           {selectedAddress.country && (
                             <>
+                              <br />
                               {selectedAddress.country}
                               {selectedAddress.postalCode &&
                                 ` ${selectedAddress.postalCode}`}
@@ -397,15 +456,18 @@ const CheckoutPage = () => {
                           Phone: {selectedAddress.phone}
                         </p>
                       ) : (
-                        <p className="text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           No address selected
                         </p>
                       )}
                     </div>
 
-                    <div className="p-4 bg-muted rounded-xl border border-border">
-                      <h3 className="font-semibold mb-2 text-foreground">Payment Method</h3>
-                      <p className="text-muted-foreground">
+                    <div className="rounded-xl border border-border bg-muted p-4">
+                      <h3 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
+                        <CreditCard className="h-4 w-4 text-primary" />
+                        Payment Method
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
                         {paymentMethod === "COD"
                           ? "Cash on Delivery"
                           : paymentMethod}
@@ -413,23 +475,24 @@ const CheckoutPage = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 p-4 bg-accent/10 rounded-xl mb-6 border border-accent/20">
-                    <Lock className="w-5 h-5 text-accent" />
+                  <div className="relative z-10 mb-6 flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/10 p-4">
+                    <Lock className="h-5 w-5 shrink-0 text-accent" />
                     <p className="text-sm text-body">
                       Your payment information is secure and encrypted
                     </p>
                   </div>
 
-                  <div className="flex gap-4">
+                  <div className="relative z-10 flex gap-3">
                     <Button
                       variant="outline"
                       onClick={() => setStep(2)}
-                      className="active:scale-95 transition-transform bg-card border-border text-body hover:bg-muted hover:border-primary/40"
+                      className={`${secondaryBtnClass} max-lg:flex-1`}
                     >
                       Back
                     </Button>
+                    {/* Phones use the sticky bar at the bottom instead */}
                     <Button
-                      className="flex-1 active:scale-95 transition-transform bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl border border-primary/20 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 cursor-pointer"
+                      className={`hidden flex-1 lg:inline-flex ${primaryBtnClass}`}
                       onClick={handleSubmit}
                       disabled={isSubmitting}
                     >
@@ -440,70 +503,65 @@ const CheckoutPage = () => {
               )}
             </motion.div>
 
-            <AddressFormDialog
-              open={isAddressDialogOpen}
-              onOpenChange={setIsAddressDialogOpen}
-              onSuccess={handleAddressCreated}
-            />
-
             {/* Order Summary */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
               className="lg:col-span-1"
             >
-              <div className="relative rounded-2xl p-6 shadow-sm shadow-slate-200/60 border border-border bg-card sticky top-24">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-transparent rounded-2xl pointer-events-none" />
-                <h2 className="font-display text-xl font-semibold mb-6 text-heading relative z-10">
+              <div className={`${cardClass} lg:sticky lg:top-24`}>
+                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/[0.04] via-transparent to-transparent" />
+                <h2 className="relative z-10 mb-5 font-display text-lg font-semibold text-heading sm:text-xl">
                   Order Summary
                 </h2>
 
-                <div className="space-y-4 mb-6">
+                <div className="relative z-10 mb-5 max-h-[360px] space-y-4 overflow-y-auto pr-1">
                   {items.map((item) => (
-                    <div key={item.id} className="flex gap-4">
+                    <div key={item.id} className="flex gap-3">
                       <img
                         src={item.paper?.thumbnail || item.book.thumbnail}
                         alt={item.book.title}
-                        className="w-16 h-20 object-cover rounded-lg border border-border"
+                        className="h-20 w-16 shrink-0 rounded-lg border border-border bg-muted object-cover"
                       />
-                      <div className="flex-1">
-                        <h3 className="font-medium line-clamp-1 text-foreground">
+                      <div className="flex min-w-0 flex-1 flex-col">
+                        <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
                           {item.book.title}
                         </h3>
                         {item.paper && (
-                          <p className="text-sm text-primary font-medium">
+                          <p className="truncate text-xs font-medium text-primary">
                             {item.paper.name}
                           </p>
                         )}
-                        <p className="text-sm text-muted-foreground">
-                          Qty: {item.quantity}
-                        </p>
-                        <p className="font-semibold text-primary">
-                          {formatPrice(getEffectivePrice(item.paper) * item.quantity)}
-                        </p>
+                        <div className="mt-auto flex items-center justify-between pt-1">
+                          <p className="text-xs text-muted-foreground">
+                            Qty: {item.quantity}
+                          </p>
+                          <p className="text-sm font-semibold text-primary">
+                            {formatPrice(getEffectivePrice(item.paper) * item.quantity)}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="space-y-3 pt-4 border-t border-border">
-                  <div className="flex justify-between">
+                <div className="relative z-10 space-y-3 border-t border-border pt-4">
+                  <div className="flex justify-between gap-4 text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium text-foreground">{formatPrice(totalPrice)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Shipping</span>
                     <span className="font-medium text-foreground">
+                      {formatPrice(totalPrice)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-4 text-sm">
+                    <span className="text-muted-foreground">Shipping</span>
+                    <span className="max-w-[60%] text-right font-medium text-foreground">
                       Delivery charge will depend on your location
                     </span>
                   </div>
-                  {/* <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tax</span>
-                    <span className="font-medium text-foreground">৳{tax.toFixed(2)}</span>
-                  </div> */}
-                  <div className="flex justify-between text-lg font-bold">
+                  <Separator className="bg-border" />
+                  <div className="flex items-baseline justify-between text-lg font-bold">
                     <span className="text-foreground">Total</span>
-                    <span className="text-primary">
+                    <span className="text-xl text-primary">
                       {formatPrice(totalPrice)}
                     </span>
                   </div>
@@ -514,22 +572,37 @@ const CheckoutPage = () => {
         </div>
       </main>
 
+      <AddressFormDialog
+        open={isAddressDialogOpen}
+        onOpenChange={setIsAddressDialogOpen}
+        onSuccess={handleAddressCreated}
+      />
+
+      {/* Sticky Place Order bar: phones, review step only */}
       {step === 3 && (
-        <div className="lg:hidden fixed bottom-16 left-0 right-0 bg-white border-t border-slate-200 p-3 safe-bottom z-40">
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-semibold touch-target"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              "Place Order"
-            )}
-          </Button>
+        <div className="safe-bottom fixed inset-x-0 bottom-16 z-40 border-t border-slate-200 bg-white/90 px-4 py-3 shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.15)] backdrop-blur-xl lg:hidden">
+          <div className="flex items-center gap-4">
+            <div className="shrink-0">
+              <p className="text-[11px] leading-none text-muted-foreground">Total</p>
+              <p className="text-lg font-bold leading-tight text-primary">
+                {formatPrice(totalPrice)}
+              </p>
+            </div>
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="touch-target h-12 flex-1 rounded-xl bg-orange-500 font-semibold text-white shadow-lg shadow-orange-500/25 transition-transform hover:bg-orange-600 active:scale-[0.98]"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Place Order"
+              )}
+            </Button>
+          </div>
         </div>
       )}
     </div>

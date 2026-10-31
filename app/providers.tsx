@@ -17,6 +17,7 @@ import { initGoogle } from "@/lib/social-login";
 // out on the login page), so their SDKs are not initialized either.
 // import { initFacebook, initApple } from "@/lib/social-login";
 import { useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +33,8 @@ export default function Providers({
 }: {
   children: React.ReactNode;
 }) {
+  const isMobile = useIsMobile();
+
   useEffect(() => {
     initGoogle(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!);
     // Facebook/Apple SDK init is disabled until those providers are configured.
@@ -54,7 +57,10 @@ export default function Providers({
                 <AddressProvider>
                   <OrderProvider>
                     <TooltipProvider>
-                      <Toaster richColors position="bottom-right" />
+                      <Toaster
+                        richColors
+                        position={isMobile ? "top-center" : "bottom-right"}
+                      />
                       <CartDrawer />
                       {children}
                     </TooltipProvider>

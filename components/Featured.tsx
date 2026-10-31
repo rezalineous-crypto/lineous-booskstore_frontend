@@ -23,7 +23,7 @@ export default function Featured() {
         className="py-20 lg:py-32 bg-gradient-to-b from-muted/30 to-background"
       >
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
@@ -96,7 +96,7 @@ export default function Featured() {
           icon={<BookOpen className="w-6 h-6 text-primary" />}
         />
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
           {featuredBooks.map((book, index) => (
             <Link key={book.id} href={`/book/${book.id}`}>
               <BookCard book={book} delay={index * 0.15} />

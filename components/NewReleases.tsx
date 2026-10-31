@@ -22,7 +22,7 @@ export default function NewReleases() {
             subtitle="Fresh off the press – discover the latest additions to our collection"
             icon={<PackageCheck className="w-6 h-6 text-primary" />}
           />
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="animate-pulse bg-muted rounded-2xl h-96" />
             ))}
