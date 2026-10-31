@@ -27,7 +27,6 @@ import {
   MenuTreeSubject,
   MenuTreeBook,
 } from "@/lib/types";
-import MobileMenuDrawer from "@/components/MobileMenuDrawer";
 
 export interface MenuItemProps {
   name: string;
@@ -301,7 +300,7 @@ const DesktopMegaMenu = ({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
-        className="absolute left-0 right-0 top-full mt-2 w-full rounded-xl shadow-xl border bg-cyan-50 backdrop-blur-md z-50 overflow-hidden border-cyan-600"
+        className="absolute left-0 right-0 top-full mt-2 w-full rounded-xl shadow-xl border bg-cyan-50 backdrop-blur-md z-50 overflow-hidden border-cyan-600 "
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
@@ -796,9 +795,9 @@ const Navbar = () => {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur-2xl border-b border-slate-200"
+      className="hidden lg:block lg:fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur-2xl border-b border-slate-200"
     >
-      <div className="container mx-auto px-4 lg:px-8">
+      <div className="container mx-auto px-4 lg:px-4">
         <div className="flex items-center justify-between h-16 lg:h-20">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative">
@@ -926,21 +925,11 @@ const Navbar = () => {
               </Button>
             )}
 
-            <button
-              onClick={() => setIsMenuOpen(true)}
-              className="lg:hidden ml-1 h-9 w-9 flex items-center justify-center rounded-lg hover:bg-muted/60 transition-colors duration-200 touch-target"
-            >
-              <Menu className="w-5 h-5 text-slate-700" />
-            </button>
+            <div className="lg:hidden w-9 h-9" />
           </div>
         </div>
       </div>
 
-      <MobileMenuDrawer
-        isOpen={isMenuOpen}
-        onClose={() => setIsMenuOpen(false)}
-        navLinks={navLinks}
-      />
     </motion.nav>
   );
 };

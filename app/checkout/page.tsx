@@ -57,6 +57,7 @@ const CheckoutPage = () => {
   // Checkout requires an account — send guests to login
   useEffect(() => {
     if (mounted && !user) {
+      toast.error("Please login to checkout");
       router.push("/login");
     }
   }, [mounted, user, router]);

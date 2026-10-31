@@ -81,11 +81,14 @@ const BooksContent = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-background">
-        <main className="pt-24 pb-16">
-          <div className="container mx-auto px-4 lg:px-8 text-center">
+        <main className="pt-20 sm:pt-24 pb-24 lg:pb-16">
+          <div className="container mx-auto px-3 sm:px-4 lg:px-8 text-center">
             <h1 className="font-display text-2xl font-bold mb-4">Error Loading Books</h1>
             <p className="text-muted-foreground mb-6">{getFriendlyErrorMessage(error)}</p>
-            <Button onClick={() => router.push("/")}>Go Home</Button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={() => window.location.reload()} variant="outline">Try Again</Button>
+              <Button onClick={() => router.push("/")}>Go Home</Button>
+            </div>
           </div>
         </main>
       </div>
@@ -234,7 +237,7 @@ const BooksPage = () => {
             <div className="animate-pulse">
               <div className="h-8 bg-muted rounded mb-4" />
               <div className="h-6 bg-muted rounded w-1/3 mb-8" />
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {[...Array(8)].map((_, i) => (
                   <div key={i} className="h-64 bg-muted rounded-xl" />
                 ))}

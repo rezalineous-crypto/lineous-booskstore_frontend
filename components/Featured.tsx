@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { motion } from "framer-motion";
 import { Sparkles, ArrowRight, BookOpen } from "lucide-react";
 import BookCard from "@/components/BookCard";
@@ -10,7 +10,7 @@ import Link from "next/link";
 export default function Featured() {
   const { data, isLoading } = useBooks();
   const books = data?.books ?? [];
-  
+
   // Interim differentiation: the API returns one list, so each home section
   // shows a different slice. Replace with a dedicated "featured" query
   // (flag or sort param) once the backend supports it.
@@ -18,11 +18,17 @@ export default function Featured() {
 
   if (isLoading) {
     return (
-      <section id="featured" className="py-20 lg:py-32 bg-gradient-to-b from-muted/30 to-background">
+      <section
+        id="featured"
+        className="py-20 lg:py-32 bg-gradient-to-b from-muted/30 to-background"
+      >
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="animate-pulse bg-muted rounded-2xl h-96" />
+              <div
+                key={i}
+                className="animate-pulse bg-muted rounded-2xl h-96"
+              />
             ))}
           </div>
         </div>
@@ -31,7 +37,10 @@ export default function Featured() {
   }
 
   return (
-    <section id="featured" className="py-20 lg:py-32 bg-gradient-to-b from-muted/30 to-background">
+    <section
+      id="featured"
+      className="py-20 lg:py-32 bg-linear-to-b from-muted/30 to-background"
+    >
       <div className="container mx-auto px-4 lg:px-8">
         {/* Featured Banner */}
         <motion.div
@@ -39,23 +48,33 @@ export default function Featured() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="relative rounded-3xl overflow-hidden mb-16 bg-gradient-to-r from-secondary to-forest-light p-10 lg:p-16"
+          className="relative rounded-3xl overflow-hidden mb-16 bg-linear-to-r from-secondary to-forest-light p-6 lg:p-16"
         >
           <div className="relative z-10 max-w-2xl">
-            <div className="inline-flex items-center gap-3 bg-gold/20 text-gold px-5 py-2.5 rounded-full mb-6 backdrop-blur-sm">
+            <div className="inline-flex items-center gap-3 border border-gray-300 text-white px-5 py-2.5 rounded-full mb-6 backdrop-blur-sm">
               <Sparkles className="w-5 h-5" />
-              <span className="text-sm font-bold tracking-wide">Editors Pick</span>
+              <span className="text-sm font-bold tracking-wide">
+                Editors Pick
+              </span>
             </div>
             <h3 className="font-display text-4xl lg:text-5xl font-bold text-secondary-foreground mb-5 leading-tight">
               Curated Collections for Every Mood
             </h3>
-            <p className="text-secondary-foreground/90 mb-8 text-lg leading-relaxed">
-              Handpicked by our literary experts – books that inspire, challenge, and transform.
+            <p className="text-secondary-foreground/90 mb-8 md:text-lg leading-relaxed">
+              Handpicked by our literary experts – books that inspire,
+              challenge, and transform.
             </p>
-            <Button variant="gold" size="lg" className="group rounded-2xl px-8 h-14 text-base font-semibold">
-              Explore Collections
-              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-2" />
-            </Button>
+            <Link href={"/books"}>
+              {" "}
+              <Button
+                variant="gold"
+                size="lg"
+                className="group rounded-2xl px-8 h-14 text-base font-semibold w-full"
+              >
+                Explore Collections
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-2" />
+              </Button>
+            </Link>
           </div>
 
           {/* Decorative elements */}
@@ -80,10 +99,7 @@ export default function Featured() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
           {featuredBooks.map((book, index) => (
             <Link key={book.id} href={`/book/${book.id}`}>
-              <BookCard
-                book={book}
-                delay={index * 0.15}
-              />
+              <BookCard book={book} delay={index * 0.15} />
             </Link>
           ))}
         </div>

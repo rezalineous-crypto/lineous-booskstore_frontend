@@ -10,7 +10,7 @@ import CommunityCTA from "../components/home/CommunityCTA";
 const HomePage = () => {
   return (
     <div className="min-h-screen bg-background">
-      <main className="pt-16 lg:pt-20">
+      <main className="lg:pt-20">
         <HeroBanner />
         <NewReleases />
         <Featured />

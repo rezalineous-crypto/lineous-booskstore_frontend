@@ -23,22 +23,22 @@ export default function SectionHeader({ title, subtitle, showViewAll = true, onV
       <div>
         <div className="flex items-center gap-3 mb-3">
           {icon}
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground">
+          <h2 className="font-display text-2xl md:text-4xl font-bold text-foreground">
             {title}
           </h2>
         </div>
         {subtitle && (
-          <p className="text-muted-foreground text-lg max-w-2xl">{subtitle}</p>
+          <p className="text-muted-foreground text-sm md:text-lg max-w-2xl">{subtitle}</p>
         )}
       </div>
-      {showViewAll && (
+      {/* {showViewAll && (
         <motion.div whileHover={{ x: 8 }} whileTap={{ scale: 0.95 }}>
           <Button variant="ghost" onClick={onViewAll} className="group text-primary font-semibold">
             View All
             <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
           </Button>
         </motion.div>
-      )}
+      )} */}
     </motion.div>
   );
 }

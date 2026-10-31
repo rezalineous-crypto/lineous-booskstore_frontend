@@ -94,6 +94,60 @@ export default function HeroBanner() {
               </span>
             </motion.div> */}
 
+            {/* ── Mobile/Tablet Book Showcase (hidden on lg+) ── */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.9, duration: 0.8 }}
+              className="relative lg:hidden h-64 sm:h-80 w-full max-w-md mx-auto mb-4"
+            >
+              {/* soft glow behind books */}
+              <div className="absolute inset-x-8 top-1/2 -translate-y-1/2 h-40 rounded-full bg-primary/25 blur-3xl" />
+
+              {/* Left book */}
+              <motion.img
+                src="/bannerImage/Chemistry.jpeg"
+                alt="Chemistry workbook"
+                className="absolute left-1/2 top-1/2 w-24 h-32 sm:w-28 sm:h-40 -ml-12 sm:-ml-14 -mt-16 sm:-mt-20 rounded-xl object-cover shadow-2xl opacity-90"
+                initial={{ opacity: 0, x: 0, rotate: 0 }}
+                animate={{ opacity: 0.9, x: -80, rotate: -12 }}
+                transition={{ delay: 1.1, duration: 0.7 }}
+              />
+
+              {/* Right book */}
+              <motion.img
+                src="/bannerImage/Amath.jpeg"
+                alt="Additional Mathematics workbook"
+                className="absolute left-1/2 top-1/2 w-24 h-32 sm:w-28 sm:h-40 -ml-12 sm:-ml-14 -mt-16 sm:-mt-20 rounded-xl object-cover shadow-2xl opacity-90"
+                initial={{ opacity: 0, x: 0, rotate: 0 }}
+                animate={{ opacity: 0.9, x: 80, rotate: 12 }}
+                transition={{ delay: 1.1, duration: 0.7 }}
+              />
+
+              {/* Center book (only element with a looping animation) */}
+              <motion.div
+                className="absolute left-1/2 top-1/2 z-10 w-32 h-44 sm:w-40 sm:h-56 -ml-16 sm:-ml-20 -mt-[88px] sm:-mt-28 rounded-2xl overflow-hidden shadow-2xl"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
+                transition={{
+                  opacity: { delay: 0.9, duration: 0.6 },
+                  scale: { delay: 0.9, duration: 0.6 },
+                  y: {
+                    delay: 1.5,
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  },
+                }}
+              >
+                <img
+                  src="/bannerImage/Biology.jpeg"
+                  alt="Biology workbook"
+                  className="w-full h-full object-cover"
+                />
+              </motion.div>
+            </motion.div>
+
             {/* Headline */}
             <motion.h1
               initial={{ opacity: 0, y: 40 }}
@@ -137,16 +191,26 @@ export default function HeroBanner() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.7 }}
-              className="text-sm sm:text-base text-gray-300 leading-relaxed mb-8 sm:mb-10 max-w-2xl"
+              className="text-sm sm:text-base text-gray-300 leading-relaxed mb-6 sm:mb-10 max-w-2xl"
             >
-              CLC Resource is an ultimate HUB for Paper based Workbooks featuring
-              real exam-style layouts with dedicated space to write the answers
-              covering the genre of Topical Past Papers, Year-wise Past Papers
-              and Predicted Mock Papers for Cambridge, Edexcel and IB
-              (International Baccalaureate) curricula designed to streamline the
-              learning and boost the exam confidence. Explore the meticulously
-              organized comprehensive collection to bridge the gap between
-              studying and scoring.
+              {/* Mobile: short version */}
+              <span className="sm:hidden">
+                Paper-based workbooks with real exam-style layouts and space to
+                write your answers. Topical, year-wise and predicted mock papers
+                for Cambridge, Edexcel and IB.
+              </span>
+
+              {/* Tablet and desktop: full version */}
+              <span className="hidden sm:inline">
+                CLC Resource is an ultimate HUB for Paper based Workbooks
+                featuring real exam-style layouts with dedicated space to write
+                the answers covering the genre of Topical Past Papers, Year-wise
+                Past Papers and Predicted Mock Papers for Cambridge, Edexcel and
+                IB (International Baccalaureate) curricula designed to
+                streamline the learning and boost the exam confidence. Explore
+                the meticulously organized comprehensive collection to bridge
+                the gap between studying and scoring.
+              </span>
             </motion.p>
 
             {/* Search Bar */}

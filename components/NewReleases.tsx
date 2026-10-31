@@ -33,7 +33,7 @@ export default function NewReleases() {
   }
 
   return (
-    <section id="new-releases" className="py-20 lg:py-32 bg-background">
+    <section id="new-releases" className="py-10 lg:py-32 bg-background">
       <div className="container mx-auto px-4 lg:px-8">
         <SectionHeader
           title="New Releases"
@@ -41,7 +41,7 @@ export default function NewReleases() {
           icon={<PackageCheck className="w-6 h-6 text-primary" />}
         />
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
           {newBooks.map((book, index) => (
             <Link key={book.id} href={`/book/${book.id}`}>
               <BookCard

@@ -7,6 +7,8 @@ import { usePathname } from "next/navigation";
 import { useCartContext } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import MobileCategoryDrawer from "@/components/MobileCategoryDrawer";
 
 type NavItem = {
   name: string;
@@ -21,6 +23,7 @@ const MobileBottomNav = () => {
   const pathname = usePathname();
   const { totalItems, setIsCartOpen } = useCartContext();
   const { isAuthenticated } = useAuth();
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   if (pathname === "/login") return null;
 
@@ -33,9 +36,13 @@ const MobileBottomNav = () => {
     },
     {
       name: "Categories",
-      href: "/books",
+      href: "#categories",
       icon: Grid3x3,
-      active: pathname.startsWith("/books"),
+      active: false,
+      onClick: (e: React.MouseEvent) => {
+        e.preventDefault();
+        setIsCategoryOpen(true);
+      },
     },
     {
       name: "Cart",
@@ -130,8 +137,13 @@ const MobileBottomNav = () => {
           );
         })}
       </div>
+      <MobileCategoryDrawer
+        isOpen={isCategoryOpen}
+        onClose={() => setIsCategoryOpen(false)}
+      />
     </nav>
   );
 };
 
 export default MobileBottomNav;
+
