@@ -53,6 +53,9 @@ const MobileCategoryDrawer = ({
     onClose();
   };
 
+  // SSR-safe portal: only render portal on client
+  if (typeof document === "undefined") return null;
+
   return createPortal(
     <AnimatePresence>
       {isOpen && (
