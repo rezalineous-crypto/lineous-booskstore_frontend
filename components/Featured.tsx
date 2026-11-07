@@ -10,7 +10,7 @@ import Link from "next/link";
 export default function Featured() {
   const { data, isLoading } = useBooks();
   const books = data?.books ?? [];
-  const featuredBooks = books;
+  const featuredBooks = books.slice(0, 8);
 
   if (isLoading) {
     return (
@@ -35,7 +35,7 @@ export default function Featured() {
   return (
     <section
       id="featured"
-      className="py-20 lg:py-32 bg-linear-to-b from-muted/30 to-background"
+      className="py-20 lg:py-20 bg-linear-to-b from-muted/30 to-background"
     >
       <div className="container mx-auto px-4 lg:px-8">
         {/* Featured Banner */}
@@ -44,7 +44,7 @@ export default function Featured() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="relative rounded-3xl overflow-hidden mb-16 bg-linear-to-r from-secondary to-forest-light p-6 lg:p-16"
+          className="relative rounded-3xl overflow-hidden mb-16 bg-linear-to-r from-secondary to-forest-light p-6 lg:p-16 lg:mb-20"
         >
           <div className="relative z-10 max-w-2xl">
             <div className="inline-flex items-center gap-3 border border-gray-300 text-white px-5 py-2.5 rounded-full mb-6 backdrop-blur-sm">
@@ -98,6 +98,19 @@ export default function Featured() {
               <BookCard book={book} delay={index * 0.15} />
             </Link>
           ))}
+        </div>
+
+        <div className="mt-12 flex justify-center">
+          <Link href="/books">
+            <Button
+              variant="ghost"
+              size="lg"
+              className="rounded-2xl px-8 h-14 text-orange-500 font-semibold md:text-lg border border-orange-500 hover:bg-orange-600 hover:text-orange-50"
+            >
+              View all books
+              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-2" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

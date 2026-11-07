@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -272,16 +272,15 @@ const DesktopMegaMenu = ({
     setActiveGrandchildIndex(null);
   }, [activeItem?.name]);
 
-  if (!activeItem) return null;
-
   const hasChildren =
-    (activeItem.children && activeItem.children.length > 0) ||
-    isLoading ||
-    !!error;
-  if (!hasChildren) return null;
-
+    activeItem &&
+    ((activeItem.children && activeItem.children.length > 0) ||
+      isLoading ||
+      !!error);
   const activeChild =
-    activeChildIndex !== null && activeItem.children
+    activeItem &&
+    activeChildIndex !== null &&
+    activeItem.children
       ? (() => {
           const child = activeItem.children[activeChildIndex];
           return typeof child === "string" ? null : child;
@@ -289,6 +288,7 @@ const DesktopMegaMenu = ({
       : null;
 
   const activeGrandchild =
+    activeItem &&
     activeGrandchildIndex !== null &&
     activeChild &&
     activeChild.children &&
@@ -301,15 +301,16 @@ const DesktopMegaMenu = ({
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-        className="absolute left-0 right-0 top-full mt-2 w-full rounded-xl shadow-xl border bg-cyan-50 backdrop-blur-md z-50 overflow-hidden border-cyan-600 "
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-      >
+      {activeItem && hasChildren && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="absolute left-0 right-0 top-full mt-2 w-full rounded-xl shadow-xl border bg-cyan-50 backdrop-blur-md z-50 overflow-hidden border-cyan-600 "
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+        >
         <div className="grid grid-cols-3 divide-x divide-slate-200 min-h-[320px]">
           {isLoading ? (
             <div className="col-span-3 flex items-center justify-center p-12">
@@ -533,6 +534,7 @@ const DesktopMegaMenu = ({
           )}
         </div>
       </motion.div>
+      )}
     </AnimatePresence>
   );
 };
@@ -652,6 +654,7 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [activeMenuIndex, setActiveMenuIndex] = useState<number | null>(null);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [skeletonCount, setSkeletonCount] = useState(() => {
     if (typeof window !== "undefined") {
       const cached = localStorage.getItem("menuTreeVisibleCount");
@@ -828,7 +831,11 @@ const Navbar = () => {
 
           <div
             className="hidden lg:flex items-center gap-1 relative"
-            onMouseLeave={() => setActiveMenuIndex(null)}
+            onMouseLeave={() => {
+              closeTimeoutRef.current = setTimeout(() => {
+                setActiveMenuIndex(null);
+              }, 200);
+            }}
           >
             {navLinks.map((link, idx) => (
               <MenuItem
@@ -847,11 +854,7 @@ const Navbar = () => {
               />
             ))}
             <DesktopMegaMenu
-              key={
-                activeMenuIndex !== null
-                  ? `${activeMenuIndex}-${navLinks[activeMenuIndex]?.name}`
-                  : "mega-none"
-              }
+              key="desktop-mega-menu"
               activeItem={
                 activeMenuIndex !== null ? navLinks[activeMenuIndex] : null
               }
@@ -870,8 +873,17 @@ const Navbar = () => {
                   ? navLinks[activeMenuIndex]?.onRetry
                   : undefined
               }
-              onMouseEnter={() => {}}
-              onMouseLeave={() => setActiveMenuIndex(null)}
+              onMouseEnter={() => {
+                if (closeTimeoutRef.current) {
+                  clearTimeout(closeTimeoutRef.current);
+                  closeTimeoutRef.current = null;
+                }
+              }}
+              onMouseLeave={() => {
+                closeTimeoutRef.current = setTimeout(() => {
+                  setActiveMenuIndex(null);
+                }, 200);
+              }}
             />
           </div>
 

@@ -2,7 +2,7 @@ import HeroBanner from "../components/HeroBanner";
 import NewReleases from "../components/NewReleases";
 import Featured from "../components/Featured";
 // import DealOfTheDay from "../components/DealOfTheDay";
-import PopularBooks from "../components/PopularBooks";
+// import PopularBooks from "../components/PopularBooks";
 import WhyChooseUs from "../components/home/WhyChooseUs";
 import SiteStats from "../components/home/SiteStats";
 import CommunityCTA from "../components/home/CommunityCTA";
@@ -17,7 +17,7 @@ const HomePage = () => {
         <WhyChooseUs />
         {/* <DealOfTheDay /> */}
         <SiteStats />
-        <PopularBooks />
+        {/* <PopularBooks /> */}
         <CommunityCTA />
       </main>
     </div>

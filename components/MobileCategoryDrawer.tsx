@@ -22,7 +22,7 @@ const MobileCategoryDrawer = ({
   onClose,
 }: MobileCategoryDrawerProps) => {
   const router = useRouter();
-  const { data: menuTree = [], isLoading } = useCategoriesMenuTree();
+  const { data: menuTree = [], isLoading, error } = useCategoriesMenuTree();
   const [activeCategory, setActiveCategory] = useState<MenuTreeCategory | null>(
     null
   );
@@ -173,32 +173,52 @@ const MobileCategoryDrawer = ({
               )}
             </motion.div>
           ) : (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="p-2 space-y-2"
-                >
-                  {menuTree.map((category: MenuTreeCategory, idx: number) => (
-                    <motion.button
-                      key={idx}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setActiveCategory(category)}
-                      className="flex items-center justify-between w-full p-4 rounded-xl hover:bg-slate-50 text-slate-700 active:text-orange-600 touch-target active:bg-orange-50 group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Folder className="w-5 h-5 text-slate-400 group-active:text-orange-600" />
-                        <span className="font-medium text-sm">
-                          {category.name}
-                        </span>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-slate-400 group-active:text-orange-600" />
-                    </motion.button>
-                  ))}
-                </motion.div>
-              )}
+            menuTree.length === 0 ? (
+              error ? (
+                <div className="text-center py-10 text-xs text-red-500">
+                  <p>Failed to load categories. Please try again.</p>
+                  <button
+                    onClick={() => {
+                      window.location.reload();
+                    }}
+                    className="mt-2 text-sm text-primary underline"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center py-10 text-xs text-slate-500">
+                  No categories available
+                </div>
+              )
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="p-2 space-y-2"
+              >
+                {menuTree.map((category: MenuTreeCategory, idx: number) => (
+                  <motion.button
+                    key={idx}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setActiveCategory(category)}
+                    className="flex items-center justify-between w-full p-4 rounded-xl hover:bg-slate-50 text-slate-700 active:text-orange-600 touch-target active:bg-orange-50 group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Folder className="w-5 h-5 text-slate-400 group-active:text-orange-600" />
+                      <span className="font-medium text-sm">
+                        {category.name}
+                      </span>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-slate-400 group-active:text-orange-600" />
+                  </motion.button>
+                ))}
+              </motion.div>
+            )
+          )}
             </div>
 
             {(activeCategory || activePublication) && (
